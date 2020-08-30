@@ -5,6 +5,11 @@ struct vector_view {
     std::vector<int>& array;
     const size_t from;
     const size_t to;
+
+    bool is_empty() {
+        return from >= to;
+    }
+
 };
 
 size_t quicksort_partition(vector_view v) {
@@ -12,15 +17,15 @@ size_t quicksort_partition(vector_view v) {
     return ((v.to - v.from) / 2) + v.from;
 }
 
-void quicksort_recursive(std::vector<int>& array, size_t from, size_t to) {
-    if(from<to) {
-        auto pivot = quicksort_partition({ array, from, to});
-        quicksort_recursive(array, from, pivot);
-        quicksort_recursive(array, pivot + 1, to);
+void quicksort_recursive(vector_view v) {
+    if(!v.is_empty()) {
+        auto pivot = quicksort_partition(v);
+        quicksort_recursive({v.array, v.from, pivot});
+        quicksort_recursive({v.array, pivot + 1, v.to});
     }
 }
 
 std::vector<int> quicksort(std::vector<int> array) {
-    quicksort_recursive(array, 0, array.size());
+    quicksort_recursive({array, 0, array.size()});
     return array;
 }
