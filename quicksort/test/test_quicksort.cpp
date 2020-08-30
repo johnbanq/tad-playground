@@ -4,15 +4,24 @@
 
 #include "tgi/quicksort/quicksort.h"
 
-TEST_CASE( "quicksort works on odd len array", "[quicksort]" ) {
-    REQUIRE(quicksort(std::vector<int>{30, 29, 17}) == std::vector<int>{17, 29, 30});
+// general test //
+
+TEST_CASE( "quicksort works", "[quicksort]" ) {
+    std::vector<std::unique_ptr<partition_algorithm>> algorithms;
+    algorithms.emplace_back(new fake_partition_algorithm());
+    algorithms.emplace_back(new basic_partition_algorithm());
+
+    for(auto& algorithm: algorithms) {
+        REQUIRE(quicksort(std::vector<int>{}, algorithm.get()) == std::vector<int>{});
+        REQUIRE(quicksort(std::vector<int>{13}, algorithm.get()) == std::vector<int>{13});
+        REQUIRE(quicksort(std::vector<int>{30, 29, 17}, algorithm.get()) == std::vector<int>{17, 29, 30});
+        REQUIRE(quicksort(std::vector<int>{87, 31}, algorithm.get()) == std::vector<int>{31, 87});
+    }
 }
 
-TEST_CASE( "quicksort works on even length array", "[quicksort]" ) {
-    REQUIRE(quicksort(std::vector<int>{87, 31}) == std::vector<int>{31, 87});
-}
+// basic partition //
 
-// basic partition
+using basic_partition_step = basic_partition_algorithm::basic_partition_step;
 
 void assert_is_finished_with_pivot(std::variant<basic_partition_step, size_t> result, size_t pivot) {
     CHECK(std::holds_alternative<size_t>(result));
