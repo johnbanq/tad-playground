@@ -2,19 +2,19 @@
 #include "tgi/quicksort/quicksort.h"
 
 size_t fake_quicksort_partition(vector_view v) {
-    std::sort(v.array.begin()+v.from, v.array.begin()+v.to);
+    std::sort(v.array().begin()+v.from, v.array().begin()+v.to);
     return ((v.to - v.from) / 2) + v.from;
 }
 
-basic_partition_step_result basic_quicksort_partition_step(vector_view v, basic_partition_step step) {
-    auto ge_begin = step.ge_begin;
-    auto le_end = step.le_end;
-    auto& pivot = v.array[v.from];
+std::variant<basic_partition_step, size_t> basic_partition_step::step() {
+    auto ge_begin = this->ge_begin;
+    auto le_end = this->le_end;
+    auto& pivot = v.array()[v.from];
 
-    while(le_end+1 < ge_begin && v.array[le_end+1] <= pivot) {
+    while(le_end+1 < ge_begin && v.array()[le_end+1] <= pivot) {
         le_end++;
     } 
-    while(ge_begin-1 > le_end && v.array[ge_begin-1] >= pivot) {
+    while(ge_begin-1 > le_end && v.array()[ge_begin-1] >= pivot) {
         ge_begin--;
     }
 
@@ -22,31 +22,24 @@ basic_partition_step_result basic_quicksort_partition_step(vector_view v, basic_
     const auto ge_size = (v.to - ge_begin);
     const auto total_size = v.to - v.from;
     if(le_size + ge_size == total_size) {
-        basic_partition_step_result result;
-        result.finished = true;
-        result.data.pivot = le_end;
-        return result;
+        const auto pivot = le_end;
+        return pivot;
     } else {
-        basic_partition_step_result result;
-        result.finished = false;
-        result.data.step.le_end = le_end;
-        result.data.step.ge_begin = ge_begin;
-        return result;
+        return basic_partition_step { v, le_end, ge_begin };
     }
 }
 
 size_t basic_quicksort_partition(vector_view v) {
-    basic_partition_step now;
-    now.le_end = v.from;
-    now.ge_begin = v.to + 1;
+    basic_partition_step step = basic_partition_step::initial(v);
     while(true) {
-        auto result = basic_quicksort_partition_step(v, now);
-        if(result.finished) {
-            std::swap(v.array[v.from], v.array[result.data.pivot]);
-            return result.data.pivot;
+        auto result = step.step();
+        if(std::holds_alternative<size_t>(result)) {
+            auto pivot = std::get<size_t>(result);
+            std::swap(v.array()[v.from], v.array()[pivot]);
+            return pivot;
         } else {
-            now = result.data.step;
-            std::swap(v.array[now.le_end+1], v.array[now.ge_begin-1]);
+            step = std::get<basic_partition_step>(result);
+            std::swap(v.array()[step.le_end+1], v.array()[step.ge_begin-1]);
         }
     }
 }
@@ -54,12 +47,12 @@ size_t basic_quicksort_partition(vector_view v) {
 void quicksort_recursive(vector_view v) {
     if(!v.is_empty()) {
         auto pivot = fake_quicksort_partition(v);
-        quicksort_recursive({v.array, v.from, pivot});
-        quicksort_recursive({v.array, pivot + 1, v.to});
+        quicksort_recursive({v.array_ptr, v.from, pivot});
+        quicksort_recursive({v.array_ptr, pivot + 1, v.to});
     }
 }
 
 std::vector<int> quicksort(std::vector<int> array) {
-    quicksort_recursive({array, 0, array.size()});
+    quicksort_recursive({&array, 0, array.size()});
     return array;
 }
