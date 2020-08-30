@@ -6,10 +6,10 @@ project(
   LANGUAGES CXX
 )
 
-
 add_executable(
-    sanity-check
+    quicksort_test
     test_sanity.cpp
+    test_quicksort.cpp
 )
-target_link_libraries(sanity-check PRIVATE Catch2::Catch)
-add_test(Test::Sanity sanity-check)
+target_link_libraries(quicksort_test PRIVATE Catch2::Catch)
+catch_discover_tests(quicksort_test)

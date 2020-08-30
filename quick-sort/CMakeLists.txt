@@ -9,12 +9,14 @@ project(
 
 # dependencies #
 add_subdirectory(lib/catch)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+include(Catch)
 
 # target definitions #
 
 add_library(
     quicksort 
-        src/stub.cpp
+        src/quicksort.cpp
 )
 target_link_libraries(quicksort PUBLIC include)
 target_compile_features(quicksort PUBLIC cxx_std_17)
