@@ -3,14 +3,14 @@
 
 size_t quicksort_partition(std::vector<int>& array, size_t from, size_t to) {
     std::sort(array.begin()+from, array.begin()+to);
-    return (to - from) / 2;
+    return ((to - from) / 2) + from;
 }
 
 void quicksort_recursive(std::vector<int>& array, size_t from, size_t to) {
     if(from<to) {
         auto pivot = quicksort_partition(array, from, to);
         quicksort_recursive(array, from, pivot);
-        quicksort_recursive(array, pivot, to);
+        quicksort_recursive(array, pivot + 1, to);
     }
 }
 
