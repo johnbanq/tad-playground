@@ -18,7 +18,7 @@ add_library(
     quicksort 
         src/quicksort.cpp
 )
-target_link_libraries(quicksort PUBLIC include)
+target_include_directories(quicksort PUBLIC include)
 target_compile_features(quicksort PUBLIC cxx_std_17)
 
 # enable tests #

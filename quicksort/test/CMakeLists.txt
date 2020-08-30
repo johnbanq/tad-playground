@@ -11,5 +11,5 @@ add_executable(
     test_sanity.cpp
     test_quicksort.cpp
 )
-target_link_libraries(quicksort_test PRIVATE Catch2::Catch)
+target_link_libraries(quicksort_test PRIVATE Catch2::Catch quicksort)
 catch_discover_tests(quicksort_test)
