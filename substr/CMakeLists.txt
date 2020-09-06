@@ -17,6 +17,7 @@ include(Catch)
 add_library(
     substr 
         src/bruteforce.cpp
+        src/rabinkarp.cpp
 )
 target_include_directories(substr PUBLIC include)
 target_compile_features(substr PUBLIC cxx_std_17)

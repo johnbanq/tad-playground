@@ -19,3 +19,10 @@ add_executable(
 )
 target_link_libraries(bruteforce_test PRIVATE Catch2::Catch substr)
 catch_discover_tests(bruteforce_test)
+
+add_executable(
+    rabinkarp_test
+    test_rabinkarp.cpp
+)
+target_link_libraries(rabinkarp_test PRIVATE Catch2::Catch substr)
+catch_discover_tests(rabinkarp_test)
