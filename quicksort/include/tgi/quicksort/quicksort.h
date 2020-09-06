@@ -25,6 +25,10 @@ struct vector_view {
         return *array_ptr;
     }
 
+    const std::vector<int>& array() const {
+        return *array_ptr;
+    }
+
 };
 
 // algorithms
@@ -56,17 +60,18 @@ struct basic_partition_algorithm: public partition_algorithm {
         size_t ge_begin;
 
         static basic_partition_step initial(vector_view v) {
+            //1st element as pivot, included in le array
             return {v, v.from, v.to};
         }
 
-        basic_partition_step set_state(size_t le_end, size_t ge_begin) {
+        basic_partition_step set_state(size_t le_end, size_t ge_begin) const {
             return {v, le_end, ge_begin};
         }
 
-        std::variant<basic_partition_step, size_t> step() {
+        std::variant<basic_partition_step, size_t> step() const {
             auto ge_begin = this->ge_begin;
             auto le_end = this->le_end;
-            auto& pivot = v.array()[v.from];
+            const auto& pivot = v.array()[v.from];
 
             while(le_end+1 < ge_begin && v.array()[le_end+1] <= pivot) {
                 le_end++;
@@ -101,6 +106,63 @@ struct basic_partition_algorithm: public partition_algorithm {
                 std::swap(v.array()[step.le_end+1], v.array()[step.ge_begin-1]);
             }
         }
+    }
+
+};
+
+struct knuth_partition_algorithm: public partition_algorithm {
+
+    struct three_way_struct {
+        
+        vector_view v;
+
+        size_t less_end; 
+        size_t equal_end;
+        size_t greater_end;
+
+        static three_way_struct initial(vector_view v) {
+            //we consider the 1st element as pivot
+            return {v, v.from, v.from+1, v.from+1};
+        }
+
+        three_way_struct set_state(size_t less_end, size_t equal_end, size_t greater_end) const {
+            return {v, less_end, equal_end, greater_end};
+        }
+
+        three_way_struct accept_element() {
+            size_t less_end = this->less_end; 
+            size_t equal_end = this->equal_end;
+            size_t greater_end = this->greater_end;
+            auto pivot = v.array()[equal_end-1];
+            auto elem = v.array()[greater_end];
+            
+            do {
+                greater_end++;
+                if(elem > pivot) {
+                    break;
+                }
+
+                std::swap(v.array()[equal_end], v.array()[greater_end-1]);
+                equal_end++;
+                if(elem == pivot) {
+                    break;
+                }
+
+                std::swap(v.array()[less_end], v.array()[equal_end-1]);
+                less_end++;
+            } while(0);
+
+            return three_way_struct{ v, less_end, equal_end, greater_end };
+        }
+
+    };
+
+    size_t partition(vector_view v) const override {
+        auto way_struct = three_way_struct::initial(v);
+        while(way_struct.greater_end<v.to) {
+            way_struct = way_struct.accept_element();
+        }
+        return way_struct.less_end;
     }
 
 };
