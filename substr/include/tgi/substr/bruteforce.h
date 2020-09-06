@@ -5,7 +5,4 @@
 
 int substr_bruteforce(std::string_view source, std::string_view pattern);
 
-bool pattern_match_from_begin(std::string_view source, std::string_view pattern);
-
-
 #endif
