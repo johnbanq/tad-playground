@@ -36,3 +36,8 @@ TEST_CASE( "from_literal builds 2 child case", "[bst][literal]" ) {
     REQUIRE(tree.root->left->value == 1);
     REQUIRE(tree.root->right->value == 3);
 }
+
+
+TEST_CASE( "to_literal prints null on empty tree", "[bst][literal]" ) {
+    REQUIRE(to_literal(from_literal("null")) == "null");
+}

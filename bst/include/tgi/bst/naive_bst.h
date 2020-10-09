@@ -26,9 +26,17 @@ struct bst {
  *  nodeLiteral = "null" | (number) | (number:nodeLiteral:nodeLiteral)
  * 
  * \param literal the literal string
- * \throw std::invalid_argument
+ * \throw std::invalid_argument if the literal is invalid
  * \return bst the tree
  */
 bst from_literal(const std::string& literal);
+
+/**
+ * \brief construct the literal from the tree
+ * 
+ * \param tree the tree
+ * \return std::string the constructed literal
+ */
+std::string to_literal(const bst& tree);
 
 #endif

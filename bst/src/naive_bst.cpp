@@ -2,6 +2,7 @@
 
 #include<iostream>
 
+
 using node = bst::node;
 
 struct literal_parser {
@@ -17,7 +18,7 @@ struct literal_parser {
 
     void consume(char ch) {
         if(!try_consume(ch)) {
-            throw std::invalid_argument{std::string{"unexpected charactor ["}+literal[offset]+"] found at literal offset="+std::to_string(offset)+", expecting "+ch};    
+            throw std::invalid_argument{std::string{"unexpected charactor ["}+literal[offset]+"] found at literal offset="+std::to_string(offset)+", expecting char"+ch};    
         }
     }
 
@@ -32,7 +33,7 @@ struct literal_parser {
 
     void consume(const std::string& str) {
         if(!try_consume(str)) {
-            throw std::invalid_argument{std::string{"unexpected charactor ["}+literal[offset]+"] found at literal offset="+std::to_string(offset)+", expecting string="+str};    
+            throw std::invalid_argument{std::string{"unexpected charactor ["}+literal[offset]+"] found at literal offset="+std::to_string(offset)+", expecting string "+str};    
         }
     }
 
@@ -47,6 +48,7 @@ struct literal_parser {
     size_t offset;
 
 };
+
 
 node* parse(literal_parser& parser);
 
@@ -74,3 +76,19 @@ node* parse(literal_parser& parser) {
     }
 }
 
+
+void write(const node* root, std::string& str);
+
+std::string to_literal(const bst& tree) {
+    std::string str;
+    write(tree.root, str);
+    return str;
+}
+
+void write(const node* root, std::string& str) {
+    if(root == nullptr) {
+        str += "null";
+    } else {
+        throw "TODO";
+    }
+}
