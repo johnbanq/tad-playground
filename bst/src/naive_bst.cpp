@@ -92,15 +92,7 @@ void write(const node* root, std::string& str) {
         str += '(';
         str += std::to_string(root->value);
         str += ')';
-    } else if(root->left == nullptr ^ root->right == nullptr) { // 1 child case
-        str += "(";
-        str += std::to_string(root->value);
-        str += ":";
-        write(root->left, str);
-        str += ":";
-        write(root->right, str);
-        str += ")";
-    } else { // 2 child case
+    } else if(root->left == nullptr || root->right == nullptr) { // 1 & 2 child case
         str += "(";
         str += std::to_string(root->value);
         str += ":";
