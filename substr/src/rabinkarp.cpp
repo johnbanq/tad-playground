@@ -1,15 +1,20 @@
 #include "tgi/substr/rabinkarp.h"
 
+
 int substr_rabinkarp(std::string_view source, std::string_view pattern) {
-    auto pattern_hash = hash_range(pattern);
-    for (auto i = 0; i <= (int)source.size() - (int)pattern.size(); i++) {
-        if(hash_range(std::string_view(source.data()+i, pattern.size()))!=pattern_hash) {
-            continue;
-        }
-        if(std::equal(source.begin()+i, source.begin()+i+pattern.size(), pattern.begin())) {
-            return i;
-        }
+    if(source.size()<pattern.size()) {
+        return -1;
     }
+
+    auto pattern_hash = hash_range(pattern);
+    auto window_iter = hash_slidewindow_iterator(source, pattern.size());
+
+    do {
+        if(window_iter.hash_value()==pattern_hash) {
+            return window_iter.offset();
+        }
+    } while(window_iter.try_slide_right());
+    
     return -1;
 }
 

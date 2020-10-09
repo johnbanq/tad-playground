@@ -26,3 +26,19 @@ TEST_CASE( "hash_range works", "[rabinkarp]" ) {
     //    6382179 % 997 == 382
     CHECK(hash_range("abc") == 382);
 }
+
+
+TEST_CASE( "hash_slidewindow_iterator works", "[rabinkarp]" ) {
+    std::string_view source("abcd");
+    hash_slidewindow_iterator iter { source, 3};
+    
+    CHECK(iter.has_next_window());
+    CHECK(iter.hash_value() == hash_range("abc"));
+    CHECK(std::string(iter.window()) == "abc");
+
+    iter.try_slide_right();
+
+    CHECK(!iter.has_next_window());
+    CHECK(iter.hash_value() == hash_range("bcd"));
+    CHECK(std::string(iter.window()) == "bcd");
+}
