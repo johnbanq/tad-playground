@@ -26,6 +26,6 @@ TEST_CASE( "from_literal builds 1 child case", "[bst][literal]" ) {
 
     tree = from_literal("(2:null:(3))");
     REQUIRE(tree.root->value == 2);
-    REQUIRE(tree.root->left->value == 1);
-    REQUIRE(tree.root->right == nullptr);
+    REQUIRE(tree.root->left == nullptr);
+    REQUIRE(tree.root->right->value == 3);
 }
