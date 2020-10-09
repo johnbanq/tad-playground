@@ -86,29 +86,37 @@ std::string to_literal(const bst& tree) {
 }
 
 void write(const node* root, std::string& str) {
-    if(root == nullptr) {
+    if(root == nullptr) { // null root case
         str += "null";
-    } else {
+    } 
+    
+    if(root->left == nullptr && root->right == nullptr) { // 0 child case
+        str += '(';
+        str += std::to_string(root->value);
+        str += ')';
+    } else if(root->left == nullptr ^ root->right == nullptr) { // 1 child case
         str += "(";
         str += std::to_string(root->value);
+        str += ":";
         if(root->left!=nullptr) {
-            str += ":";
             write(root->left, str);
         } else {
-            if(root->right!=nullptr) {
-                str += ":";
-                str += "null";
-            }
+            str += "null";
         }
+        str += ":";
         if(root->right!=nullptr) {
-            str += ":";
             write(root->right, str);
         } else {
-            if(root->left!=nullptr) {
-                str += ":";
-                str += "null";
-            }
+            str += "null";
         }
+        str += ")";
+    } else { // 2 child case
+        str += "(";
+        str += std::to_string(root->value);
+        str += ":";
+        write(root->left, str);
+        str += ":";
+        write(root->right, str);
         str += ")";
     }
 }
