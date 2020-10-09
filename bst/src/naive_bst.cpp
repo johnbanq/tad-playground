@@ -89,6 +89,26 @@ void write(const node* root, std::string& str) {
     if(root == nullptr) {
         str += "null";
     } else {
-        throw "TODO";
+        str += "(";
+        str += std::to_string(root->value);
+        if(root->left!=nullptr) {
+            str += ":";
+            write(root->left, str);
+        } else {
+            if(root->right!=nullptr) {
+                str += ":";
+                str += "null";
+            }
+        }
+        if(root->right!=nullptr) {
+            str += ":";
+            write(root->right, str);
+        } else {
+            if(root->left!=nullptr) {
+                str += ":";
+                str += "null";
+            }
+        }
+        str += ")";
     }
 }

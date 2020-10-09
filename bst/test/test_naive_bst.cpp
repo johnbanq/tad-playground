@@ -41,3 +41,12 @@ TEST_CASE( "from_literal builds 2 child case", "[bst][literal]" ) {
 TEST_CASE( "to_literal prints null on empty tree", "[bst][literal]" ) {
     REQUIRE(to_literal(from_literal("null")) == "null");
 }
+
+TEST_CASE( "to_literal handles 0 child case", "[bst][literal]" ) {
+    REQUIRE(to_literal(from_literal("(1)")) == "(1)");
+}
+
+TEST_CASE( "to_literal handles 1 child case", "[bst][literal]" ) {
+    REQUIRE(to_literal(from_literal("(2:(1):null)")) == "(2:(1):null)");
+    REQUIRE(to_literal(from_literal("(2:null:(3))")) == "(2:null:(3))");
+}
