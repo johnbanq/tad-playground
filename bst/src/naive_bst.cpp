@@ -11,49 +11,60 @@ bst from_literal(const std::string& literal) {
     return bst{parse(literal, offset)};
 }
 
-void consume(const std::string& literal, int& offset, char ch) {
+
+
+bool try_consume(const std::string& literal, int& offset, char ch) {
     if(literal[offset]==ch) {
         offset += 1;
+        return true;
     } else {
+        return false;   
+    }
+}
+
+void consume(const std::string& literal, int& offset, char ch) {
+    if(!try_consume(literal, offset, ch)) {
         throw std::invalid_argument{std::string{"unexpected charactor ["}+literal[offset]+"] found at literal offset="+std::to_string(offset)+", expecting "+ch};    
     }
 }
 
+bool try_consume(const std::string& literal, int& offset, const std::string& str) {
+    if(literal.substr(offset, str.size())==str) {
+        offset += str.size();
+        return true;
+    } else {
+        return false;   
+    }
+}
+
+void consume(const std::string& literal, int& offset, const std::string& str) {
+    if(!try_consume(literal, offset, str)) {
+        throw std::invalid_argument{std::string{"unexpected charactor ["}+literal[offset]+"] found at literal offset="+std::to_string(offset)+", expecting string="+str};    
+    }
+}
+
+int parse_int(const std::string& literal, int& offset) {
+    size_t parsed = 0;
+    int value = std::stoi(literal.substr(offset, literal.size()), &parsed, 10);
+    offset += parsed;
+    return value;
+}
+
 node* parse(const std::string& literal, int& offset) {
-    if(literal.substr(offset, sizeof("null")-1) == "null") {
-        offset += 4;
+    if(try_consume(literal, offset, "null")) {
         return nullptr;
     } else {
-        if(literal[offset] == '(') {
-            offset += 1;
-            size_t parsed = 0;
-            int value = std::stoi(literal.substr(offset, literal.size()), &parsed, 10);
-            offset += parsed;
-            if(literal[offset]==')') {
-                offset += 1;
-                return new node{value, nullptr, nullptr};
-            } else {
-                if(literal[offset]==':') {
-                    offset += 1;
-                    auto left = parse(literal, offset);
-                    if(literal[offset]==':') {
-                        offset += 1;
-                        auto right = parse(literal, offset);
-                        if(literal[offset]==')') {
-                            offset += 1;
-                            return new node{value, left, right};
-                        } else {
-                            throw std::invalid_argument{std::string{"unexpected charactor ["}+literal[offset]+"] found at literal offset="+std::to_string(offset)+", expecting )"};    
-                        }
-                    } else {
-                        throw std::invalid_argument{std::string{"unexpected charactor ["}+literal[offset]+"] found at literal offset="+std::to_string(offset)+", expecting :"};
-                    }
-                } else {
-                    throw std::invalid_argument{std::string{"unexpected charactor ["}+literal[offset]+"] found at literal offset="+std::to_string(offset)+", expecting :"};
-                }
-            }
+        consume(literal, offset, '(');
+        int value = parse_int(literal, offset);
+        if(try_consume(literal, offset, ')')) {
+            return new node{value, nullptr, nullptr};
         } else {
-            throw std::invalid_argument{std::string{"unexpected charactor ["}+literal[offset]+"] found at literal offset="+std::to_string(offset)+", expecting ("};
+            consume(literal, offset, ':');
+            auto left = parse(literal, offset);
+            consume(literal, offset, ':');
+            auto right = parse(literal, offset);
+            consume(literal, offset, ')');
+            return new node{value, left, right};
         }
     }
 }
