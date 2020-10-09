@@ -96,17 +96,9 @@ void write(const node* root, std::string& str) {
         str += "(";
         str += std::to_string(root->value);
         str += ":";
-        if(root->left!=nullptr) {
-            write(root->left, str);
-        } else {
-            str += "null";
-        }
+        write(root->left, str);
         str += ":";
-        if(root->right!=nullptr) {
-            write(root->right, str);
-        } else {
-            str += "null";
-        }
+        write(root->right, str);
         str += ")";
     } else { // 2 child case
         str += "(";
