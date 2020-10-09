@@ -88,9 +88,7 @@ std::string to_literal(const bst& tree) {
 void write(const node* root, std::string& str) {
     if(root == nullptr) { // null root case
         str += "null";
-    } 
-    
-    if(root->left == nullptr && root->right == nullptr) { // 0 child case
+    } else if(root->left == nullptr && root->right == nullptr) { // 0 child case
         str += '(';
         str += std::to_string(root->value);
         str += ')';
