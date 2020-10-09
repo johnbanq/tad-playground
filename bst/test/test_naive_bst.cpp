@@ -50,3 +50,7 @@ TEST_CASE( "to_literal handles 1 child case", "[bst][literal]" ) {
     REQUIRE(to_literal(from_literal("(2:(1):null)")) == "(2:(1):null)");
     REQUIRE(to_literal(from_literal("(2:null:(3))")) == "(2:null:(3))");
 }
+
+TEST_CASE( "to_literal handles 2 child case", "[bst][literal]" ) {
+    REQUIRE(to_literal(from_literal("(2:(1):(3))")) == "(2:(1):(3))");
+}
