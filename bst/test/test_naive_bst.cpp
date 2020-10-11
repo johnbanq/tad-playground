@@ -7,6 +7,8 @@
 
 // naive bst test //
 
+// from_literal //
+
 TEST_CASE( "from_literal builds empty tree on null", "[bst][literal]" ) {
     auto tree = from_literal("null");
     REQUIRE(tree.root == nullptr);
@@ -42,6 +44,22 @@ TEST_CASE( "from_literal builds 2 child case", "[bst][literal]" ) {
     REQUIRE(tree.root->right->value == 3);
 }
 
+TEST_CASE( "from_literal performs recursively", "[bst][literal]" ) {
+    auto tree = from_literal("(4:(2:(1):(3)):(6:(5):(7)))");
+    REQUIRE(tree.root->value == 4);
+
+    REQUIRE(tree.root->left->parent == tree.root);
+    REQUIRE(tree.root->left->value == 2);
+    REQUIRE(tree.root->left->left->parent == tree.root->left);
+    REQUIRE(tree.root->left->left->value == 1);
+    
+    REQUIRE(tree.root->right->parent == tree.root);
+    REQUIRE(tree.root->right->value == 6);
+    REQUIRE(tree.root->right->right->parent == tree.root->right);
+    REQUIRE(tree.root->right->right->value == 7);
+}
+
+// to_literal //
 
 TEST_CASE( "to_literal prints null on empty tree", "[bst][literal]" ) {
     REQUIRE(to_literal(from_literal("null")) == "null");
@@ -60,6 +78,11 @@ TEST_CASE( "to_literal handles 2 child case", "[bst][literal]" ) {
     REQUIRE(to_literal(from_literal("(2:(1):(3))")) == "(2:(1):(3))");
 }
 
+TEST_CASE( "to_literal performs recursively", "[bst][literal]" ) {
+    REQUIRE(to_literal(from_literal("(4:(2:(1):(3)):(6:(5):(7)))")) == "(4:(2:(1):(3)):(6:(5):(7)))");
+}
+
+// to_graphviz //
 
 TEST_CASE( "node_stmt works", "[bst][visualize]" ) {
     auto tree = from_literal("(2)");
@@ -115,4 +138,89 @@ TEST_CASE( "to_graphviz handles handles has 2 child case", "[bst][visualize]" ) 
         + edge_stmt(3, 2, "parent")
         + "}"
     );
+}
+
+TEST_CASE( "to_graphviz performs recursively", "[bst][visualize]" ) {
+    auto tree = from_literal("(4:(2:(1):null):null)");
+    REQUIRE(to_graphviz(tree) == "digraph bst{"
+        + node_stmt(4, tree.root)
+        + edge_stmt(4, 2, "left")
+        + node_stmt(2, tree.root->left)
+        + edge_stmt(2, 4, "parent")
+        + edge_stmt(2, 1, "left")
+        + node_stmt(1, tree.root->left->left)
+        + edge_stmt(1, 2, "parent")
+        + "}"
+    );
+
+    tree = from_literal("(4:null:(6:null:(7)))");
+    REQUIRE(to_graphviz(tree) == "digraph bst{"
+        + node_stmt(4, tree.root)
+        + edge_stmt(4, 6, "right")
+        + node_stmt(6, tree.root->right)
+        + edge_stmt(6, 4, "parent")
+        + edge_stmt(6, 7, "right")
+        + node_stmt(7, tree.root->right->right)
+        + edge_stmt(7, 6, "parent")
+        + "}"
+    );
+}
+
+// verification test //
+
+TEST_CASE( "parent_violation works", "[bst][verify]" ) {
+ auto tree = from_literal("(2:(1):(3))");
+    auto parent = tree.root;
+    auto child = tree.root->left;
+    child->parent = parent->right;
+    REQUIRE(parent_violation(parent, child) == "node {"+std::to_string(child->value)+"}'s parent should point to {"+int_to_hex((uint16_t)parent)+"}, not {"+int_to_hex((uint16_t)child->parent)+"}");
+}
+
+
+TEST_CASE( "find_violation accepts empty tree", "[bst][verify]" ) {
+    auto tree = from_literal("null");
+    REQUIRE(find_violation(tree) == std::vector<std::string>{});
+}
+
+TEST_CASE( "find_violation works", "[bst][verify]" ) {
+    auto tree = from_literal("(2:(1):(3))");
+    REQUIRE(find_violation(tree) == std::vector<std::string>{});
+}
+
+TEST_CASE( "find_violation rejects error in pointer", "[bst][verify]" ) {
+    auto tree = from_literal("(2:(1):(3))");
+    tree.root->left->parent = tree.root->right;
+    REQUIRE(find_violation(tree) == std::vector<std::string>{parent_violation(tree.root, tree.root->left)});
+
+    tree = from_literal("(2:(1):(3))");
+    tree.root->right->parent = tree.root->left;
+    REQUIRE(find_violation(tree) == std::vector<std::string>{parent_violation(tree.root, tree.root->right)});
+}
+
+TEST_CASE( "find_violation rejects error in pointer recursively", "[bst][verify]" ) {
+    auto tree = from_literal("(4:(2:(1):(3)):(6:(5):(7)))");
+    auto root = tree.root->left;
+    root->left->parent = root->right;
+    REQUIRE(find_violation(tree) == std::vector<std::string>{parent_violation(root, root->left)});
+
+    tree = from_literal("(4:(2:(1):(3)):(6:(5):(7)))");
+    root = tree.root->right;
+    root->right->parent = root->left;
+    REQUIRE(find_violation(tree) == std::vector<std::string>{parent_violation(root, root->right)});
+}
+
+TEST_CASE( "find_violation rejects error in value", "[bst][verify]" ) {
+    auto tree = from_literal("(2:(3):(4))");
+    REQUIRE(find_violation(tree) == std::vector<std::string>{"{3} is in wrong place: it should must be in range (int_min,2]"});
+
+    tree = from_literal("(2:(0):(1))");
+    REQUIRE(find_violation(tree) == std::vector<std::string>{"{1} is in wrong place: it should must be in range (2,int_max]"});
+}
+
+TEST_CASE( "find_violation rejects error in value recursively", "[bst][verify]" ) {
+    auto tree = from_literal("(4:(2:(1):(9)):(6:(5):(7)))");
+    REQUIRE(find_violation(tree) == std::vector<std::string>{"{9} is in wrong place: it should must be in range (2,4]"});
+
+    tree = from_literal("(4:(2:(0):(3)):(6:(1):(7)))");
+    REQUIRE(find_violation(tree) == std::vector<std::string>{"{1} is in wrong place: it should must be in range (4,6]"});
 }

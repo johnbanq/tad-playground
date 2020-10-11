@@ -11,6 +11,9 @@ static std::string node_stmt(int value, const bst::node* addr) {
     return std::to_string(value)+"[label=\""+std::to_string(value)+"("+int_to_hex((uint16_t(addr)))+")\"];";
 }
 
+/**
+ * construct the edge statement of graphviz
+ */
 static std::string edge_stmt(int from, int to, const std::string& edge) {
     auto stmt = std::to_string(from)+" -> "+std::to_string(to)+" [label=\""+edge+"\"]";
     if(edge == "parent") {
@@ -18,6 +21,11 @@ static std::string edge_stmt(int from, int to, const std::string& edge) {
     }
     stmt += ";";
     return stmt;
+}
+
+
+static std::string parent_violation(const bst::node* parent, const bst::node* child) {
+    return "node {"+std::to_string(child->value)+"}'s parent should point to {"+int_to_hex((uint16_t)parent)+"}, not {"+int_to_hex((uint16_t)child->parent)+"}";
 }
 
 #endif

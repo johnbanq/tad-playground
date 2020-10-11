@@ -3,6 +3,7 @@
 
 #include<string>
 #include<stdexcept>
+#include<vector>
 
 struct bst {
 
@@ -47,5 +48,13 @@ std::string to_literal(const bst& tree);
  * \return std::string the graphviz code
  */
 std::string to_graphviz(const bst& tree);
+
+/**
+ * \brief check the validity of the binary search tree
+ * 
+ * \param tree the tree to check
+ * \return std::vector<std::string> the detected violations, empty if none 
+ */
+std::vector<std::string> find_violation(const bst& tree);
 
 #endif

@@ -2,6 +2,8 @@
 #include "tgi/bst/hex_util.h"
 #include "tgi/bst/internal_naive_bst.h"
 
+#include <limits>
+
 using node = bst::node;
 
 struct literal_parser {
@@ -126,5 +128,50 @@ void to_graphviz(const bst::node* root, std::string& buffer) {
         }
         to_graphviz(root->left, buffer);
         to_graphviz(root->right, buffer);
+    }
+}
+
+
+/**
+ * find violations in pointer pointing, eg: incorrect parent
+ */
+void find_pointer_violation(const bst::node* node, std::vector<std::string>& violations);
+
+/**
+ * find violation in value placement, eg bigger value in left branch
+ * the node is expected to be in range (min, max]
+ */
+void find_value_violation(const bst::node* node, int min, int max, std::vector<std::string>& violations);
+
+std::vector<std::string> find_violation(const bst& tree) {
+    auto violations = std::vector<std::string>{};
+    find_pointer_violation(tree.root, violations);
+    find_value_violation(tree.root, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), violations);
+    return violations;
+}
+
+void find_pointer_violation(const bst::node* node, std::vector<std::string>& violations) {
+    if(node != nullptr) {
+        if(node->left!=nullptr && node->left->parent != node) {
+            violations.push_back(parent_violation(node, node->left));
+        }
+        find_pointer_violation(node->left, violations);
+        if(node->right!=nullptr && node->right->parent != node) {
+            violations.push_back(parent_violation(node, node->right));
+        }
+        find_pointer_violation(node->right, violations);
+    }
+}
+
+void find_value_violation(const bst::node* node, int min, int max, std::vector<std::string>& violations) {
+    if(node!=nullptr) {
+        if(!(min < node->value && node->value <= max)) {
+            auto min_repr = (min == std::numeric_limits<int>::min() ? std::string{"int_min"} : std::to_string(min));
+            auto max_repr = (max == std::numeric_limits<int>::max() ? std::string{"int_max"} : std::to_string(max));
+            violations.push_back("{"+std::to_string(node->value)+"} is in wrong place: it should must be in range ("+min_repr+","+max_repr+"]");
+        } else {
+            find_value_violation(node->left, min, node->value, violations);
+            find_value_violation(node->right, node->value, max, violations);
+        }
     }
 }
