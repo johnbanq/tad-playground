@@ -251,8 +251,26 @@ bool search(bst& tree, int value) {
     return search_internal(tree.root, value);
 }
 
+std::pair<node*, node**> locate_parent_and_expected_ref(bst::node* parent, bst::node** source_ref, int value) {
+    bst::node* node = *source_ref;
+    if(node == nullptr) {
+        return std::make_pair(parent, source_ref);
+    } else {
+        if(value < node->value) {
+            return locate_parent_and_expected_ref(node, &(node->left), value);
+        } else if(value == node->value) {
+            return std::make_pair(parent, source_ref);
+        } else {
+            return locate_parent_and_expected_ref(node, &(node->right), value);
+        }
+    }
+} 
 
-void remove_internal(node* parent, int value);
+std::pair<node*, node**> locate_parent_and_expected_ref(bst& tree, int value) {
+    return locate_parent_and_expected_ref(nullptr, &(tree.root), value);
+} 
+
+void perform_deletion(bst::node* parent, bst::node*& ref);
 
 int steal_value_from_smallest_in_right_subtree(node* node) {
     bst::node* result = node->right;
@@ -260,7 +278,8 @@ int steal_value_from_smallest_in_right_subtree(node* node) {
         result = result->left;
     }
     int stolen = result->value;
-    remove_internal(node, stolen);
+    auto [parent, ref] = locate_parent_and_expected_ref(node, &(node->right), stolen);
+    perform_deletion(parent, *ref);
     return stolen;
 }
 
@@ -282,62 +301,9 @@ void perform_deletion(bst::node* parent, bst::node*& ref) {
     }
 }
 
-std::pair<node*, node**> locate_parent_and_expected_ref_internal(bst::node* parent, bst::node** source_ref, int value) {
-    bst::node* node = *source_ref;
-    if(node == nullptr) {
-        return std::make_pair(parent, source_ref);
-    } else {
-        if(value < node->value) {
-            return locate_parent_and_expected_ref_internal(node, &(node->left), value);
-        } else if(value == node->value) {
-            return std::make_pair(parent, source_ref);
-        } else {
-            return locate_parent_and_expected_ref_internal(node, &(node->right), value);
-        }
-    }
-} 
-
-std::pair<node*, node**> locate_parent_and_expected_ref(bst& tree, int value) {
-    return locate_parent_and_expected_ref_internal(nullptr, &(tree.root), value);
-} 
-
-void remove_new(bst& tree, int value) {
+void remove(bst& tree, int value) {
     auto [parent, ref] = locate_parent_and_expected_ref(tree, value);
     if(*ref != nullptr) {
         perform_deletion(parent, *ref);
     }
-}
-
-void remove_internal(node* parent, int value) {
-    if(value < parent->value) {
-        if(parent->left != nullptr) {
-            if(parent->left->value == value) {
-                perform_deletion(parent, parent->left);
-            } else {
-                remove_internal(parent->left, value);
-            }
-        }
-    } else if(value == parent->value) {
-        throw std::logic_error{"unexpected: we cannot delete parent because we dont know which reference to tweak!"}; 
-    } else { /* if(value > parent->value) */
-        if(parent->right != nullptr) {
-            if(parent->right->value == value) {
-                perform_deletion(parent, parent->right);
-            } else {
-                remove_internal(parent->right, value);
-            }
-        }
-    }
-}
-
-void remove(bst& tree, int value) {
-    remove_new(tree, value);
-    // trying out new remove
-    // if(tree.root != nullptr) {
-    //     if(value == tree.root->value) {
-    //         perform_deletion(nullptr, tree.root);
-    //     } else {
-    //         remove_internal(tree.root, value);
-    //     }
-    // }
 }
