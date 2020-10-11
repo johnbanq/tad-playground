@@ -16,10 +16,14 @@ struct bst {
 
     // object semantics, rejects copy
 
+    bst(node* root) 
+        :root(root){}
+
     bst(const bst&) = delete;
     bst& operator=(bst&) = delete;
     bst(bst&&);
     bst& operator=(bst&&);
+    
     ~bst();
 
     node* root;
@@ -64,5 +68,13 @@ std::string to_graphviz(const bst& tree);
  * \return std::vector<std::string> the detected violations, empty if none 
  */
 std::vector<std::string> find_violation(const bst& tree);
+
+/**
+ * \brief insert an element into the tree
+ * 
+ * \param tree the tree
+ * \param value the value to insert
+ */
+void insert(bst& tree, int value);
 
 #endif

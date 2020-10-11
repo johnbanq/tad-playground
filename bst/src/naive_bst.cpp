@@ -24,6 +24,7 @@ bst& bst::operator=(bst&& other) {
     delete_tree(this->root);
     this->root = other.root;
     other.root = nullptr;
+    return *this;
 }
 
 bst::~bst() {
@@ -197,5 +198,29 @@ void find_value_violation(const bst::node* node, int min, int max, std::vector<s
             find_value_violation(node->left, min, node->value, violations);
             find_value_violation(node->right, node->value, max, violations);
         }
+    }
+}
+
+void insert_internal(node* n, int value) {
+    if(value <= n->value) {
+        if(n->left == nullptr) {
+            n->left = new node{value, n, nullptr, nullptr};
+        } else {
+            insert_internal(n->left, value);
+        }
+    } else {
+        if(n->right == nullptr) {
+            n->right = new node{value, n, nullptr, nullptr};
+        } else {
+            insert_internal(n->right, value);
+        }
+    }
+}
+
+void insert(bst& tree, int value) {
+    if(tree.root == nullptr) {
+        tree.root = new node {value, nullptr, nullptr, nullptr};
+    } else {
+        insert_internal(tree.root, value);
     }
 }
