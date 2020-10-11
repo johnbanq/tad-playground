@@ -207,32 +207,6 @@ void find_value_violation(const bst::node* node, int min, int max, std::vector<s
 }
 
 
-void insert_internal(node* n, int value) {
-    if(value < n->value) {
-        if(n->left == nullptr) {
-            n->left = new node{value, n, nullptr, nullptr};
-        } else {
-            insert_internal(n->left, value);
-        }
-    } else if(value == n->value ) {
-        return; // no need to insert
-    } else {  /* if(value > node->value) */
-        if(n->right == nullptr) {
-            n->right = new node{value, n, nullptr, nullptr};
-        } else {
-            insert_internal(n->right, value);
-        }
-    }
-}
-
-void insert(bst& tree, int value) {
-    if(tree.root == nullptr) {
-        tree.root = new node {value, nullptr, nullptr, nullptr};
-    } else {
-        insert_internal(tree.root, value);
-    }
-}
-
 std::pair<node*, node**> locate_parent_and_expected_ref(bst::node* parent, bst::node** source_ref, int value) {
     bst::node* node = *source_ref;
     if(node == nullptr) {
@@ -255,6 +229,13 @@ std::pair<node*, node**> locate_parent_and_expected_ref(bst& tree, int value) {
 bool search(bst& tree, int value) {
     auto [parent, ref] = locate_parent_and_expected_ref(tree, value);
     return (*ref) != nullptr;
+}
+
+void insert(bst& tree, int value) {
+    auto [parent, ref] = locate_parent_and_expected_ref(tree, value);
+    if(*ref == nullptr) {
+        *ref = new node {value, parent, nullptr, nullptr};
+    }
 }
 
 void perform_deletion(bst::node* parent, bst::node*& ref) {

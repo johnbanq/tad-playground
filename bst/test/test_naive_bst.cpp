@@ -229,24 +229,39 @@ TEST_CASE( "find_violation rejects error in value recursively", "[bst][verify]" 
     REQUIRE(find_violation(tree) == std::vector<std::string>{"{1} is in wrong place: it should must be in range (4,6]"});
 }
 
+// assert utility //
+
+bool is_valid_bst(const bst& tree) {
+    REQUIRE(find_violation(tree) == std::vector<std::string>{});
+    //so we can write REQUIRE(is_valid_bst(tree));
+    return true;
+}
+
+// locate parent and ref test //
+
+TEST_CASE("locate_parent_and_expected_ref locates root correctly", "[bst][locate]" ) {
+    auto tree = from_literal("(2)");
+    REQUIRE(locate_parent_and_expected_ref(tree, 2) == std::make_pair((bst::node*)nullptr, &tree.root));
+}
+
+TEST_CASE("locate_parent_and_expected_ref locates node's pointer correctly", "[bst][locate]" ) {
+    auto tree = from_literal("(2:(1):(3))");
+    REQUIRE(locate_parent_and_expected_ref(tree, 1) == std::make_pair(tree.root, &(tree.root->left)));
+    REQUIRE(locate_parent_and_expected_ref(tree, 3) == std::make_pair(tree.root, &(tree.root->right)));
+
+    tree = from_literal("(2)");
+    REQUIRE(locate_parent_and_expected_ref(tree, 1) == std::make_pair(tree.root, &(tree.root->left)));
+    REQUIRE(locate_parent_and_expected_ref(tree, 3) == std::make_pair(tree.root, &(tree.root->right)));
+}
+
 // search test //
 
-TEST_CASE("search works on null tree", "[bst][search]" ) {
+TEST_CASE("search works on empty tree", "[bst][search]" ) {
     auto tree = from_literal("null");
     REQUIRE(search(tree, 2) == false);
 }
 
-TEST_CASE("search works on simple tree", "[bst][search]" ) {
-    auto tree = from_literal("(2:(1):null)");
-    REQUIRE(search(tree, 1) == true);
-    REQUIRE(search(tree, 0) == false);
-
-    tree = from_literal("(2:null:(3))");
-    REQUIRE(search(tree, 3) == true);
-    REQUIRE(search(tree, 4) == false);
-}
-
-TEST_CASE("search works on complex tree", "[bst][search]" ) {
+TEST_CASE("search works on sample tree", "[bst][search]" ) {
     auto tree = from_literal("(10:(4:(3):(5)):(15:(12):(17)))");
     for (auto i : {3,4,5,10,12,15,17}) {
         REQUIRE(search(tree, i) == true);
@@ -264,10 +279,11 @@ TEST_CASE("search works on complex tree", "[bst][search]" ) {
 
 // insert test //
 
-bool is_valid_bst(const bst& tree) {
-    REQUIRE(find_violation(tree) == std::vector<std::string>{});
-    //so we can write REQUIRE(is_valid_bst(tree));
-    return true;
+TEST_CASE( "insert ignores duplicate value", "[bst][insert]" ) {
+    auto tree = from_literal("(2)");
+    insert(tree, 2);
+    REQUIRE(is_valid_bst(tree));
+    REQUIRE(to_literal(tree) == "(2)");
 }
 
 TEST_CASE( "insert works on empty tree", "[bst][insert]" ) {
@@ -277,19 +293,7 @@ TEST_CASE( "insert works on empty tree", "[bst][insert]" ) {
     REQUIRE(to_literal(tree) == "(2)");
 }
 
-TEST_CASE( "insert works on simple tree", "[bst][insert]" ) {
-    auto tree = from_literal("(2)");
-    insert(tree, 1);
-    REQUIRE(is_valid_bst(tree));
-    REQUIRE(to_literal(tree) == "(2:(1):null)");
-
-    tree = from_literal("(2)");
-    insert(tree, 3);
-    REQUIRE(is_valid_bst(tree));
-    REQUIRE(to_literal(tree) == "(2:null:(3))");
-}
-
-TEST_CASE( "insert works on complex tree", "[bst][insert]" ) {
+TEST_CASE( "insert works on sample tree", "[bst][insert]" ) {
     auto tree = from_literal("(10:(4:(3):null):(15:null:(17)))");
     insert(tree, 5);
     REQUIRE(is_valid_bst(tree));
@@ -300,6 +304,7 @@ TEST_CASE( "insert works on complex tree", "[bst][insert]" ) {
     REQUIRE(to_literal(tree) == "(10:(4:(3):(5)):(15:(12):(17)))");
 }
 
+// remove test //
 
 TEST_CASE( "remove accepts non-existent value", "[bst][remove]" ) {
     auto tree = from_literal("(2:(1):(3))");
@@ -307,7 +312,6 @@ TEST_CASE( "remove accepts non-existent value", "[bst][remove]" ) {
     REQUIRE(is_valid_bst(tree));
     REQUIRE(to_literal(tree) == "(2:(1):(3))");
 }
-
 
 TEST_CASE( "remove works on no child case", "[bst][remove]" ) {
     auto tree = from_literal("(2:(1):(3))");
@@ -321,47 +325,7 @@ TEST_CASE( "remove works on no child case", "[bst][remove]" ) {
 }
 
 TEST_CASE( "remove works on 1 child case", "[bst][remove]" ) {
-    auto tree = from_literal("(10:(4:(3):null):(15:(12):(17)))");
-    remove(tree, 4);
-    REQUIRE(is_valid_bst(tree));
-    REQUIRE(to_literal(tree) == "(10:(3):(15:(12):(17)))");
-
-    tree = from_literal("(10:(4:null:(5)):(15:(12):(17)))");
-    remove(tree, 4);
-    REQUIRE(is_valid_bst(tree));
-    REQUIRE(to_literal(tree) == "(10:(5):(15:(12):(17)))");
-
-    tree = from_literal("(10:(4:(3):(5)):(15:null:(17)))");
-    remove(tree, 15);
-    REQUIRE(is_valid_bst(tree));
-    REQUIRE(to_literal(tree) == "(10:(4:(3):(5)):(17))");
-
-    tree = from_literal("(10:(4:(3):(5)):(15:(12):null))");
-    remove(tree, 15);
-    REQUIRE(is_valid_bst(tree));
-    REQUIRE(to_literal(tree) == "(10:(4:(3):(5)):(12))");
-}
-
-
-TEST_CASE( "remove works on 2 child case", "[bst][remove]" ) {
-    auto tree = from_literal("(10:(4:(3):(5)):(15:(12):(17)))");
-    remove(tree, 4);
-    REQUIRE(is_valid_bst(tree));
-    REQUIRE(to_literal(tree) == "(10:(5:(3):null):(15:(12):(17)))");
-
-    tree = from_literal("(10:(4:(3):(5)):(15:(12):(17)))");
-    remove(tree, 15);
-    REQUIRE(is_valid_bst(tree));
-    REQUIRE(to_literal(tree) == "(10:(4:(3):(5)):(17:(12):null))");
-}
-
-TEST_CASE( "remove works on root node", "[bst][remove]" ) {
-    auto tree = from_literal("(2)");
-    remove(tree, 2);
-    REQUIRE(is_valid_bst(tree));
-    REQUIRE(to_literal(tree) == "null");
-
-    tree = from_literal("(2:(1):null)");
+    auto tree = from_literal("(2:(1):null)");
     remove(tree, 2);
     REQUIRE(is_valid_bst(tree));
     REQUIRE(to_literal(tree) == "(1)");
@@ -370,8 +334,10 @@ TEST_CASE( "remove works on root node", "[bst][remove]" ) {
     remove(tree, 2);
     REQUIRE(is_valid_bst(tree));
     REQUIRE(to_literal(tree) == "(3)");
+}
 
-    tree = from_literal("(2:(1):(3))");
+TEST_CASE( "remove works on 2 child case", "[bst][remove]" ) {
+    auto tree = from_literal("(2:(1):(3))");
     remove(tree, 2);
     REQUIRE(is_valid_bst(tree));
     REQUIRE(to_literal(tree) == "(3:(1):null)");
