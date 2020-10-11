@@ -207,7 +207,6 @@ void find_value_violation(const bst::node* node, int min, int max, std::vector<s
 }
 
 
-
 void insert_internal(node* n, int value) {
     if(value < n->value) {
         if(n->left == nullptr) {
@@ -265,26 +264,55 @@ int steal_value_from_smallest_in_right_subtree(node* node) {
     return stolen;
 }
 
+void perform_deletion(bst::node* parent, bst::node*& ref) {
+    bst::node* node = ref;
+    if(node->left == nullptr && node->right == nullptr) { // 0 child case
+        ref = nullptr;
+        delete node;
+    }  else if(node->left != nullptr && node->right == nullptr) { // 1 child case
+        ref = node->left;
+        ref->parent = parent;
+        delete node;
+    } else if(node->left == nullptr && node->right != nullptr) { // 1 child case
+        ref = node->right;
+        ref->parent = parent;
+        delete node;
+    } else { // 2 child case
+        node->value = steal_value_from_smallest_in_right_subtree(node);
+    }
+}
+
+std::pair<node*, node**> locate_parent_and_expected_ref_internal(bst::node* parent, bst::node** source_ref, int value) {
+    bst::node* node = *source_ref;
+    if(node == nullptr) {
+        return std::make_pair(parent, source_ref);
+    } else {
+        if(value < node->value) {
+            return locate_parent_and_expected_ref_internal(node, &(node->left), value);
+        } else if(value == node->value) {
+            return std::make_pair(parent, source_ref);
+        } else {
+            return locate_parent_and_expected_ref_internal(node, &(node->right), value);
+        }
+    }
+} 
+
+std::pair<node*, node**> locate_parent_and_expected_ref(bst& tree, int value) {
+    return locate_parent_and_expected_ref_internal(nullptr, &(tree.root), value);
+} 
+
+void remove_new(bst& tree, int value) {
+    auto [parent, ref] = locate_parent_and_expected_ref(tree, value);
+    if(*ref != nullptr) {
+        perform_deletion(parent, *ref);
+    }
+}
+
 void remove_internal(node* parent, int value) {
     if(value < parent->value) {
         if(parent->left != nullptr) {
             if(parent->left->value == value) {
-                auto node = parent->left;
-                auto& ref = parent->left;
-                if(node->left == nullptr && node->right == nullptr) { // 0 child case
-                    ref = nullptr;
-                    delete node;
-                } else if(node->left != nullptr && node->right == nullptr) { // 1 child case
-                    ref = node->left;
-                    ref->parent = parent;
-                    delete node;
-                } else if(node->left == nullptr && node->right != nullptr) { // 1 child case
-                    ref = node->right;
-                    ref->parent = parent;
-                    delete node;
-                } else { // 2 child case
-                    node->value = steal_value_from_smallest_in_right_subtree(node);
-                }
+                perform_deletion(parent, parent->left);
             } else {
                 remove_internal(parent->left, value);
             }
@@ -294,22 +322,7 @@ void remove_internal(node* parent, int value) {
     } else { /* if(value > parent->value) */
         if(parent->right != nullptr) {
             if(parent->right->value == value) {
-                auto node = parent->right;
-                auto& ref = parent->right;
-                if(node->left == nullptr && node->right == nullptr) { // 0 child case
-                    ref = nullptr;
-                    delete node;
-                }  else if(node->left != nullptr && node->right == nullptr) { // 1 child case
-                    ref = node->left;
-                    ref->parent = parent;
-                    delete node;
-                } else if(node->left == nullptr && node->right != nullptr) { // 1 child case
-                    ref = node->right;
-                    ref->parent = parent;
-                    delete node;
-                } else { // 2 child case
-                    node->value = steal_value_from_smallest_in_right_subtree(node);
-                }
+                perform_deletion(parent, parent->right);
             } else {
                 remove_internal(parent->right, value);
             }
@@ -318,26 +331,13 @@ void remove_internal(node* parent, int value) {
 }
 
 void remove(bst& tree, int value) {
-    if(tree.root != nullptr) {
-        if(value == tree.root->value) {
-            auto node = tree.root;
-            auto& ref = tree.root;
-            if(node->left == nullptr && node->right == nullptr) { // 0 child case
-                ref = nullptr;
-                delete node;
-            }  else if(node->left != nullptr && node->right == nullptr) { // 1 child case
-                ref = node->left;
-                ref->parent = nullptr;
-                delete node;
-            } else if(node->left == nullptr && node->right != nullptr) { // 1 child case
-                ref = node->right;
-                ref->parent = nullptr;
-                delete node;
-            } else { // 2 child case
-                node->value = steal_value_from_smallest_in_right_subtree(node);
-            }
-        } else {
-            remove_internal(tree.root, value);
-        }
-    }
+    remove_new(tree, value);
+    // trying out new remove
+    // if(tree.root != nullptr) {
+    //     if(value == tree.root->value) {
+    //         perform_deletion(nullptr, tree.root);
+    //     } else {
+    //         remove_internal(tree.root, value);
+    //     }
+    // }
 }
