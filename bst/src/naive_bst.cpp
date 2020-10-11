@@ -270,19 +270,6 @@ std::pair<node*, node**> locate_parent_and_expected_ref(bst& tree, int value) {
     return locate_parent_and_expected_ref(nullptr, &(tree.root), value);
 } 
 
-void perform_deletion(bst::node* parent, bst::node*& ref);
-
-int steal_value_from_smallest_in_right_subtree(node* node) {
-    bst::node* result = node->right;
-    while(result->left!=nullptr) {
-        result = result->left;
-    }
-    int stolen = result->value;
-    auto [parent, ref] = locate_parent_and_expected_ref(node, &(node->right), stolen);
-    perform_deletion(parent, *ref);
-    return stolen;
-}
-
 void perform_deletion(bst::node* parent, bst::node*& ref) {
     bst::node* node = ref;
     if(node->left == nullptr && node->right == nullptr) { // 0 child case
@@ -297,7 +284,15 @@ void perform_deletion(bst::node* parent, bst::node*& ref) {
         ref->parent = parent;
         delete node;
     } else { // 2 child case
-        node->value = steal_value_from_smallest_in_right_subtree(node);
+        //we replace the node to delete with the right subtree's smallest element
+        bst::node* victim = node->right;
+        while(victim->left!=nullptr) {
+            victim = victim->left;
+        }
+        int victim_value = victim->value;
+        auto [victim_parent, victim_ref] = locate_parent_and_expected_ref(node, &(node->right), victim_value);
+        perform_deletion(victim_parent, *victim_ref);
+        node->value = victim_value;
     }
 }
 
