@@ -209,13 +209,15 @@ void find_value_violation(const bst::node* node, int min, int max, std::vector<s
 
 
 void insert_internal(node* n, int value) {
-    if(value <= n->value) {
+    if(value < n->value) {
         if(n->left == nullptr) {
             n->left = new node{value, n, nullptr, nullptr};
         } else {
             insert_internal(n->left, value);
         }
-    } else {
+    } else if(value == n->value ) {
+        return; // no need to insert
+    } else {  /* if(value > node->value) */
         if(n->right == nullptr) {
             n->right = new node{value, n, nullptr, nullptr};
         } else {
@@ -251,30 +253,37 @@ bool search(bst& tree, int value) {
 }
 
 
+void remove_internal(node* parent, int value);
+
+int steal_value_from_smallest_in_right_subtree(node* node) {
+    bst::node* result = node->right;
+    while(result->left!=nullptr) {
+        result = result->left;
+    }
+    int stolen = result->value;
+    remove_internal(node, stolen);
+    return stolen;
+}
+
 void remove_internal(node* parent, int value) {
     if(value < parent->value) {
         if(parent->left != nullptr) {
             if(parent->left->value == value) {
                 auto node = parent->left;
+                auto& ref = parent->left;
                 if(node->left == nullptr && node->right == nullptr) { // 0 child case
-                    parent->left = nullptr;
+                    ref = nullptr;
                     delete node;
                 } else if(node->left != nullptr && node->right == nullptr) { // 1 child case
-                    parent->left = node->left;
-                    parent->left->parent = parent;
+                    ref = node->left;
+                    ref->parent = parent;
                     delete node;
                 } else if(node->left == nullptr && node->right != nullptr) { // 1 child case
-                    parent->left = node->right;
-                    parent->left->parent = parent;
+                    ref = node->right;
+                    ref->parent = parent;
                     delete node;
                 } else { // 2 child case
-                    bst::node* min_of_right_sub_tree = parent->left->right;
-                    while(min_of_right_sub_tree->left!=nullptr) {
-                        min_of_right_sub_tree = min_of_right_sub_tree->left;
-                    }
-                    auto value_of_min_of_right_sub_tree = min_of_right_sub_tree->value;
-                    remove_internal(parent->left, value_of_min_of_right_sub_tree);
-                    node->value = value_of_min_of_right_sub_tree;
+                    node->value = steal_value_from_smallest_in_right_subtree(node);
                 }
             } else {
                 remove_internal(parent->left, value);
@@ -286,25 +295,20 @@ void remove_internal(node* parent, int value) {
         if(parent->right != nullptr) {
             if(parent->right->value == value) {
                 auto node = parent->right;
+                auto& ref = parent->right;
                 if(node->left == nullptr && node->right == nullptr) { // 0 child case
-                    parent->right = nullptr;
+                    ref = nullptr;
                     delete node;
                 }  else if(node->left != nullptr && node->right == nullptr) { // 1 child case
-                    parent->right = node->left;
-                    parent->right->parent = parent;
+                    ref = node->left;
+                    ref->parent = parent;
                     delete node;
                 } else if(node->left == nullptr && node->right != nullptr) { // 1 child case
-                    parent->right = node->right;
-                    parent->right->parent = parent;
+                    ref = node->right;
+                    ref->parent = parent;
                     delete node;
                 } else { // 2 child case
-                    bst::node* min_of_right_sub_tree = parent->right->right;
-                    while(min_of_right_sub_tree->left!=nullptr) {
-                        min_of_right_sub_tree = min_of_right_sub_tree->left;
-                    }
-                    auto value_of_min_of_right_sub_tree = min_of_right_sub_tree->value;
-                    remove_internal(parent->right, value_of_min_of_right_sub_tree);
-                    node->value = value_of_min_of_right_sub_tree;
+                    node->value = steal_value_from_smallest_in_right_subtree(node);
                 }
             } else {
                 remove_internal(parent->right, value);
@@ -317,25 +321,20 @@ void remove(bst& tree, int value) {
     if(tree.root != nullptr) {
         if(value == tree.root->value) {
             auto node = tree.root;
+            auto& ref = tree.root;
             if(node->left == nullptr && node->right == nullptr) { // 0 child case
-                tree.root = nullptr;
+                ref = nullptr;
                 delete node;
             }  else if(node->left != nullptr && node->right == nullptr) { // 1 child case
-                tree.root = node->left;
-                tree.root->parent = nullptr;
+                ref = node->left;
+                ref->parent = nullptr;
                 delete node;
             } else if(node->left == nullptr && node->right != nullptr) { // 1 child case
-                tree.root = node->right;
-                tree.root->parent = nullptr;
+                ref = node->right;
+                ref->parent = nullptr;
                 delete node;
             } else { // 2 child case
-                bst::node* min_of_right_sub_tree = node->right;
-                while(min_of_right_sub_tree->left!=nullptr) {
-                    min_of_right_sub_tree = min_of_right_sub_tree->left;
-                }
-                auto value_of_min_of_right_sub_tree = min_of_right_sub_tree->value;
-                remove_internal(tree.root, value_of_min_of_right_sub_tree);
-                node->value = value_of_min_of_right_sub_tree;
+                node->value = steal_value_from_smallest_in_right_subtree(node);
             }
         } else {
             remove_internal(tree.root, value);
