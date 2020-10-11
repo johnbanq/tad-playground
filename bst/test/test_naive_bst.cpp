@@ -240,7 +240,7 @@ TEST_CASE( "insert works on empty tree", "[bst][insert]" ) {
     REQUIRE(to_literal(tree) == "(2)");
 }
 
-TEST_CASE( "insert works on normal tree", "[bst][insert]" ) {
+TEST_CASE( "insert works on simple tree", "[bst][insert]" ) {
     auto tree = from_literal("(2)");
     insert(tree, 1);
     REQUIRE(is_valid_bst(tree));
@@ -250,4 +250,15 @@ TEST_CASE( "insert works on normal tree", "[bst][insert]" ) {
     insert(tree, 3);
     REQUIRE(is_valid_bst(tree));
     REQUIRE(to_literal(tree) == "(2:null:(3))");
+}
+
+TEST_CASE( "insert works on complex tree", "[bst][insert]" ) {
+    auto tree = from_literal("(10:(4:(3):null):(15:null:(17)))");
+    insert(tree, 5);
+    REQUIRE(is_valid_bst(tree));
+    REQUIRE(to_literal(tree) == "(10:(4:(3):(5)):(15:null:(17)))");
+
+    insert(tree, 12);
+    REQUIRE(is_valid_bst(tree));
+    REQUIRE(to_literal(tree) == "(10:(4:(3):(5)):(15:(12):(17)))");
 }
