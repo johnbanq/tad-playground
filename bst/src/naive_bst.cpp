@@ -49,28 +49,29 @@ struct literal_parser {
 };
 
 
-node* parse(literal_parser& parser);
+node* parse(literal_parser& parser, bst::node* parent);
 
 bst from_literal(const std::string& literal) {
     literal_parser parser{literal, 0};
-    return bst{parse(parser)};
+    return bst{parse(parser, nullptr)};
 }
 
-node* parse(literal_parser& parser) {
+node* parse(literal_parser& parser, bst::node* parent) {
     if(parser.try_consume("null")) {
         return nullptr;
     } else {
         parser.consume('(');
         int value = parser.parse_int();
         if(parser.try_consume(')')) {
-            return new node{value, nullptr, nullptr};
+            return new node{value, parent, nullptr, nullptr};
         } else {
+            auto result = new node{value, parent, nullptr, nullptr};
             parser.consume(':');
-            auto left = parse(parser);
+            result->left = parse(parser, result);
             parser.consume(':');
-            auto right = parse(parser);
+            result->right = parse(parser, result);
             parser.consume(')');
-            return new node{value, left, right};
+            return result;
         }
     }
 }
@@ -114,6 +115,9 @@ std::string to_graphviz(const bst& tree) {
 void to_graphviz(const bst::node* root, std::string& buffer) {
     if(root!=nullptr) {
         buffer += node_stmt(root->value, root);
+        if(root->parent != nullptr) {
+            buffer += edge_stmt(root->value, root->parent->value, "parent");
+        }
         if(root->left != nullptr) {
             buffer += edge_stmt(root->value, root->left->value, "left");
         }

@@ -12,7 +12,12 @@ static std::string node_stmt(int value, const bst::node* addr) {
 }
 
 static std::string edge_stmt(int from, int to, const std::string& edge) {
-    return std::to_string(from)+" -> "+std::to_string(to)+" [label=\""+edge+"\"];";
+    auto stmt = std::to_string(from)+" -> "+std::to_string(to)+" [label=\""+edge+"\"]";
+    if(edge == "parent") {
+        stmt += "[color=grey][fontcolor=grey]";
+    }
+    stmt += ";";
+    return stmt;
 }
 
 #endif

@@ -8,6 +8,7 @@ struct bst {
 
     struct node {
         int value;
+        node* parent;
         node* left;
         node* right;
     };

@@ -22,19 +22,23 @@ TEST_CASE( "from_literal builds root tree", "[bst][literal]" ) {
 TEST_CASE( "from_literal builds 1 child case", "[bst][literal]" ) {
     auto tree = from_literal("(2:(1):null)");
     REQUIRE(tree.root->value == 2);
+    REQUIRE(tree.root->left->parent == tree.root);
     REQUIRE(tree.root->left->value == 1);
     REQUIRE(tree.root->right == nullptr);
 
     tree = from_literal("(2:null:(3))");
     REQUIRE(tree.root->value == 2);
     REQUIRE(tree.root->left == nullptr);
+    REQUIRE(tree.root->right->parent == tree.root);
     REQUIRE(tree.root->right->value == 3);
 }
 
 TEST_CASE( "from_literal builds 2 child case", "[bst][literal]" ) {
     auto tree = from_literal("(2:(1):(3))");
     REQUIRE(tree.root->value == 2);
+    REQUIRE(tree.root->left->parent == tree.root);
     REQUIRE(tree.root->left->value == 1);
+    REQUIRE(tree.root->right->parent == tree.root);
     REQUIRE(tree.root->right->value == 3);
 }
 
@@ -66,6 +70,10 @@ TEST_CASE( "edge_stmt works", "[bst][visualize]" ) {
     REQUIRE(edge_stmt(2, 1, "left") == "2 -> 1 [label=\"left\"];");
 }
 
+TEST_CASE( "edge_stmt gives grey on parent", "[bst][visualize]" ) {
+    REQUIRE(edge_stmt(2, 1, "parent") == "2 -> 1 [label=\"parent\"][color=grey][fontcolor=grey];");
+}
+
 TEST_CASE( "to_graphviz handles null case", "[bst][visualize]" ) {
     REQUIRE(to_graphviz(from_literal("null")) == "digraph bst{}");
 }
@@ -81,6 +89,7 @@ TEST_CASE( "to_graphviz handles handles has 1 child case", "[bst][visualize]" ) 
         + node_stmt(2, tree.root)
         + edge_stmt(2, 1, "left")
         + node_stmt(1, tree.root->left)
+        + edge_stmt(1, 2, "parent")
         + "}"
     );
 
@@ -89,6 +98,7 @@ TEST_CASE( "to_graphviz handles handles has 1 child case", "[bst][visualize]" ) 
         + node_stmt(2, tree.root)
         + edge_stmt(2, 3, "right")
         + node_stmt(3, tree.root->right)
+        + edge_stmt(3, 2, "parent")
         + "}"
     );
 }
@@ -100,7 +110,9 @@ TEST_CASE( "to_graphviz handles handles has 2 child case", "[bst][visualize]" ) 
         + edge_stmt(2, 1, "left")
         + edge_stmt(2, 3, "right")
         + node_stmt(1, tree.root->left)
+        + edge_stmt(1, 2, "parent")
         + node_stmt(3, tree.root->right)
+        + edge_stmt(3, 2, "parent")
         + "}"
     );
 }
