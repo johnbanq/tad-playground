@@ -86,6 +86,31 @@ struct literal_parser {
 
 };
 
+template<typename node_type>
+struct literal_writer {
+
+    virtual ~literal_writer() = default;
+
+    void write(const node_type* root, std::string& str) {
+        if(root == nullptr) { // null root case
+            str += "null";
+        } else {
+            str += "(";
+            write_value(root, str);
+            if(root->left != nullptr || root->right != nullptr) { // at least 1 child
+                str += ":";
+                write(root->left, str);
+                str += ":";
+                write(root->right, str);
+            }
+            str += ")";
+        }
+    }
+
+    virtual void write_value(const node_type* root, std::string& str) = 0;
+
+};
+
 // others //
 
 /**

@@ -54,29 +54,19 @@ bst bst_from_literal(const std::string& literal) {
     return bst{parser.parse(nullptr)};
 }
 
+struct bst_literal_writer: public literal_writer<bst::node> {
 
-void write(const node* root, std::string& str);
+    virtual void write_value(const bst::node* root, std::string& str) override {
+        str += std::to_string(root->value);
+    }
+
+};
 
 std::string to_literal(const bst& tree) {
+    bst_literal_writer writer;
     std::string str;
-    write(tree.root, str);
+    writer.write(tree.root, str);
     return str;
-}
-
-void write(const node* root, std::string& str) {
-    if(root == nullptr) { // null root case
-        str += "null";
-    } else {
-        str += "(";
-        str += std::to_string(root->value);
-        if(root->left != nullptr || root->right != nullptr) { // at least 1 child
-            str += ":";
-            write(root->left, str);
-            str += ":";
-            write(root->right, str);
-        }
-        str += ")";
-    }
 }
 
 

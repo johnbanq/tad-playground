@@ -55,3 +55,18 @@ avl avl_from_literal(const std::string& literal) {
     avl_literal_parser parser{literal, 0};
     return avl{parser.parse(nullptr)};
 }
+
+struct avl_literal_writer: public literal_writer<avl::node> {
+
+    virtual void write_value(const avl::node* root, std::string& str) override {
+        str += std::to_string(root->value);
+    }
+
+};
+
+std::string to_literal(const avl& tree) {
+    avl_literal_writer writer;
+    std::string str;
+    writer.write(tree.root, str);
+    return str;
+}
