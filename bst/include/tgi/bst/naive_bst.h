@@ -77,4 +77,22 @@ std::vector<std::string> find_violation(const bst& tree);
  */
 void insert(bst& tree, int value);
 
+/**
+ * \brief is the value in the tree?
+ * 
+ * \param tree the tree
+ * \param value the value to find
+ * \return true if exists in tree
+ * \return false if not exists in tree
+ */
+bool search(bst& tree, int value);
+
+/**
+ * \brief remove a node from the tree
+ * 
+ * \param tree the tree
+ * \param value the value to remove
+ */
+void remove(bst& tree, int value);
+
 #endif

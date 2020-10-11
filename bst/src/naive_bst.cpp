@@ -201,6 +201,8 @@ void find_value_violation(const bst::node* node, int min, int max, std::vector<s
     }
 }
 
+
+
 void insert_internal(node* n, int value) {
     if(value <= n->value) {
         if(n->left == nullptr) {
@@ -223,4 +225,19 @@ void insert(bst& tree, int value) {
     } else {
         insert_internal(tree.root, value);
     }
+}
+
+bool search_internal(node* node, int value) {
+    if(node == nullptr) {
+        return false;
+    } else {
+        return node->value == value
+            || search_internal(node->left, value)
+            || search_internal(node->right, value)
+            ;
+    }
+}
+
+bool search(bst& tree, int value) {
+    return search_internal(tree.root, value);
 }

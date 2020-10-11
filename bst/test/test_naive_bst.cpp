@@ -225,6 +225,39 @@ TEST_CASE( "find_violation rejects error in value recursively", "[bst][verify]" 
     REQUIRE(find_violation(tree) == std::vector<std::string>{"{1} is in wrong place: it should must be in range (4,6]"});
 }
 
+// search test //
+
+TEST_CASE("search works on null tree", "[bst][search]" ) {
+    auto tree = from_literal("null");
+    REQUIRE(search(tree, 2) == false);
+}
+
+TEST_CASE("search works on simple tree", "[bst][search]" ) {
+    auto tree = from_literal("(2:(1):null)");
+    REQUIRE(search(tree, 1) == true);
+    REQUIRE(search(tree, 0) == false);
+
+    tree = from_literal("(2:null:(3))");
+    REQUIRE(search(tree, 3) == true);
+    REQUIRE(search(tree, 4) == false);
+}
+
+TEST_CASE("search works on complex tree", "[bst][search]" ) {
+    auto tree = from_literal("(10:(4:(3):(5)):(15:(12):(17)))");
+    for (auto i : {3,4,5,10,12,15,17}) {
+        REQUIRE(search(tree, i) == true);
+    }
+    
+    //random samples
+
+    //right-left & left-right leaf
+    REQUIRE(search(tree, 6) == false);
+    REQUIRE(search(tree, 13) == false);
+    //intermediate stop
+    REQUIRE(search(tree, 20) == false);
+}
+
+
 // insert test //
 
 bool is_valid_bst(const bst& tree) {
