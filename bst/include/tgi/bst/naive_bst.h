@@ -39,4 +39,12 @@ bst from_literal(const std::string& literal);
  */
 std::string to_literal(const bst& tree);
 
+/**
+ * \brief construct the graphviz code that represents the tree
+ * 
+ * \param tree the tree
+ * \return std::string the graphviz code
+ */
+std::string to_graphviz(const bst& tree);
+
 #endif

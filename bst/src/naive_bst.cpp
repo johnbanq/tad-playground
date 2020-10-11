@@ -1,7 +1,6 @@
 #include "tgi/bst/naive_bst.h"
-
-#include<iostream>
-
+#include "tgi/bst/hex_util.h"
+#include "tgi/bst/internal_naive_bst.h"
 
 using node = bst::node;
 
@@ -88,17 +87,45 @@ std::string to_literal(const bst& tree) {
 void write(const node* root, std::string& str) {
     if(root == nullptr) { // null root case
         str += "null";
-    } else if(root->left == nullptr && root->right == nullptr) { // 0 child case
-        str += '(';
-        str += std::to_string(root->value);
-        str += ')';
-    } else if(root->left != nullptr || root->right != nullptr) { // 1 & 2 child case
+    } else {
         str += "(";
         str += std::to_string(root->value);
-        str += ":";
-        write(root->left, str);
-        str += ":";
-        write(root->right, str);
+        if(root->left != nullptr || root->right != nullptr) { // at least 1 child
+            str += ":";
+            write(root->left, str);
+            str += ":";
+            write(root->right, str);
+        }
         str += ")";
+    }
+}
+
+
+void to_graphviz(const bst::node* root, std::string& buffer);
+
+std::string to_graphviz(const bst& tree) {
+    std::string buffer;
+    buffer += "digraph bst{";
+    to_graphviz(tree.root, buffer);
+    buffer += "}";
+    return buffer;
+}
+
+void to_graphviz(const bst::node* root, std::string& buffer) {
+    if(root!=nullptr) {
+        buffer += node_stmt(root->value, root);
+        if(root->left != nullptr) {
+            buffer += std::to_string(root->value)+" -> "+std::to_string(root->left->value)+" [label=\"left\"];";
+        }
+        if(root->right != nullptr) {
+            buffer += std::to_string(root->value)+" -> "+std::to_string(root->right->value)+" [label=\"right\"];";
+        }
+
+        if(root->left != nullptr) {
+            to_graphviz(root->left, buffer);
+        }
+        if(root->right != nullptr) {
+            to_graphviz(root->right, buffer);
+        }
     }
 }
