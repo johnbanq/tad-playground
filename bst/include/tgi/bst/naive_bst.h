@@ -14,6 +14,14 @@ struct bst {
         node* right;
     };
 
+    // object semantics, rejects copy
+
+    bst(const bst&) = delete;
+    bst& operator=(bst&) = delete;
+    bst(bst&&);
+    bst& operator=(bst&&);
+    ~bst();
+
     node* root;
 
 };

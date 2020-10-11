@@ -6,6 +6,30 @@
 
 using node = bst::node;
 
+void delete_tree(node* n) {
+    if(n!=nullptr) {
+        delete_tree(n->left);
+        delete_tree(n->right);
+        delete n;
+    }
+}
+
+bst::bst(bst&& other)
+    :root(nullptr) {
+    this->root = other.root;
+    other.root = nullptr;
+}
+
+bst& bst::operator=(bst&& other) {
+    delete_tree(this->root);
+    this->root = other.root;
+    other.root = nullptr;
+}
+
+bst::~bst() {
+    delete_tree(root);
+}
+
 struct literal_parser {
 
     bool try_consume(char ch) {
