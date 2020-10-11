@@ -20,15 +20,20 @@ TEST_CASE( "to_literal works", "[avl][literal]" ) {
     REQUIRE(to_literal(avl_from_literal("(4:(2:(1):(3)):(6:(5):(7)))")) == "(4:(2:(1):(3)):(6:(5):(7)))");
 }
 
+TEST_CASE( "avl_node_stmt works", "[bst][visualize]" ) {
+    auto tree = avl_from_literal("(2)");
+    REQUIRE(avl_node_stmt(tree.root) == "2[label=\"2(h:0)(a:"+int_to_hex((uint16_t(tree.root)))+")\"];");
+}
+
 TEST_CASE( "to_graphviz works", "[avl][visualize]" ) {
     auto tree = avl_from_literal("(2:(1):(3))");
     REQUIRE(to_graphviz(tree) == "digraph bst{"
-        + node_stmt(2, tree.root)
+        + avl_node_stmt(tree.root)
         + edge_stmt(2, 1, "left")
         + edge_stmt(2, 3, "right")
-        + node_stmt(1, tree.root->left)
+        + avl_node_stmt(tree.root->left)
         + edge_stmt(1, 2, "parent")
-        + node_stmt(3, tree.root->right)
+        + avl_node_stmt(tree.root->right)
         + edge_stmt(3, 2, "parent")
         + "}"
     );
