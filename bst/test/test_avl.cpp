@@ -4,6 +4,7 @@
 
 #include "tgi/bst/avl.h"
 #include "tgi/bst/internal_avl.h"
+#include "tgi/bst/internal_naive_bst.h"
 
 
 TEST_CASE( "from_literal works", "[avl][literal]" ) {
@@ -17,4 +18,18 @@ TEST_CASE( "from_literal works", "[avl][literal]" ) {
 
 TEST_CASE( "to_literal works", "[avl][literal]" ) {
     REQUIRE(to_literal(avl_from_literal("(4:(2:(1):(3)):(6:(5):(7)))")) == "(4:(2:(1):(3)):(6:(5):(7)))");
+}
+
+TEST_CASE( "to_graphviz works", "[avl][visualize]" ) {
+    auto tree = avl_from_literal("(2:(1):(3))");
+    REQUIRE(to_graphviz(tree) == "digraph bst{"
+        + node_stmt(2, tree.root)
+        + edge_stmt(2, 1, "left")
+        + edge_stmt(2, 3, "right")
+        + node_stmt(1, tree.root->left)
+        + edge_stmt(1, 2, "parent")
+        + node_stmt(3, tree.root->right)
+        + edge_stmt(3, 2, "parent")
+        + "}"
+    );
 }

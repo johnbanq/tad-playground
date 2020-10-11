@@ -111,12 +111,48 @@ struct literal_writer {
 
 };
 
+template<typename node_type>
+struct graphviz_writer {
+
+    virtual ~graphviz_writer() = default;
+
+    std::string write(const node_type* root) {
+        std::string buffer;
+        buffer += "digraph bst{";
+        write(root, buffer);
+        buffer += "}";
+        return buffer;
+    }
+
+    void write(const node_type* root, std::string& buffer) {
+        if(root!=nullptr) {
+            write_node(root, buffer);
+            if(root->parent != nullptr) {
+                write_edge(root, root->parent, "parent", buffer);
+            }
+            if(root->left != nullptr) {
+                write_edge(root, root->left, "left", buffer);
+            }
+            if(root->right != nullptr) {
+                write_edge(root, root->right, "right", buffer);
+            }
+            write(root->left, buffer);
+            write(root->right, buffer);
+        }
+    }
+
+    virtual void write_node(const node_type* root, std::string& buffer) = 0;
+
+    virtual void write_edge(const node_type* from, const node_type* to, const std::string& type, std::string& buffer) = 0;
+
+};
+
 // others //
 
 /**
  * construct the node statement of graphviz
  */
-static std::string node_stmt(int value, const bst::node* addr) {
+static std::string node_stmt(int value, const void* addr) {
     return std::to_string(value)+"[label=\""+std::to_string(value)+"("+int_to_hex((uint16_t(addr)))+")\"];";
 }
 

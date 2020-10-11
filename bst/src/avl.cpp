@@ -70,3 +70,20 @@ std::string to_literal(const avl& tree) {
     writer.write(tree.root, str);
     return str;
 }
+
+struct avl_graphviz_writer: public graphviz_writer<avl::node> {
+
+    virtual void write_node(const avl::node* root, std::string& buffer) override {
+        buffer += node_stmt(root->value, root);
+    }
+
+    virtual void write_edge(const avl::node* from, const avl::node* to, const std::string& type, std::string& buffer) override {
+        buffer += edge_stmt(from->value, to->value, type);
+    }
+
+};
+
+std::string to_graphviz(const avl& tree) {
+    avl_graphviz_writer writer;
+    return writer.write(tree.root);
+}

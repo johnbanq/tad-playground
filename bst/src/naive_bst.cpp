@@ -69,32 +69,21 @@ std::string to_literal(const bst& tree) {
     return str;
 }
 
+struct bst_graphviz_writer: public graphviz_writer<bst::node> {
 
-void to_graphviz(const bst::node* root, std::string& buffer);
+    virtual void write_node(const bst::node* root, std::string& buffer) override {
+        buffer += node_stmt(root->value, root);
+    }
+
+    virtual void write_edge(const bst::node* from, const bst::node* to, const std::string& type, std::string& buffer) override {
+        buffer += edge_stmt(from->value, to->value, type);
+    }
+
+};
 
 std::string to_graphviz(const bst& tree) {
-    std::string buffer;
-    buffer += "digraph bst{";
-    to_graphviz(tree.root, buffer);
-    buffer += "}";
-    return buffer;
-}
-
-void to_graphviz(const bst::node* root, std::string& buffer) {
-    if(root!=nullptr) {
-        buffer += node_stmt(root->value, root);
-        if(root->parent != nullptr) {
-            buffer += edge_stmt(root->value, root->parent->value, "parent");
-        }
-        if(root->left != nullptr) {
-            buffer += edge_stmt(root->value, root->left->value, "left");
-        }
-        if(root->right != nullptr) {
-            buffer += edge_stmt(root->value, root->right->value, "right");
-        }
-        to_graphviz(root->left, buffer);
-        to_graphviz(root->right, buffer);
-    }
+    bst_graphviz_writer writer;
+    return writer.write(tree.root);
 }
 
 
