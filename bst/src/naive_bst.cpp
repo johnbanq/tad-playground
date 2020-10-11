@@ -170,7 +170,12 @@ void find_value_violation(const bst::node* node, int min, int max, std::vector<s
 
 std::vector<std::string> find_violation(const bst& tree) {
     auto violations = std::vector<std::string>{};
+
+    if(tree.root != nullptr && tree.root->parent != nullptr) {
+        violations.push_back("root's parent must be null!");
+    }
     find_pointer_violation(tree.root, violations);
+    
     find_value_violation(tree.root, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), violations);
     return violations;
 }
@@ -231,13 +236,109 @@ bool search_internal(node* node, int value) {
     if(node == nullptr) {
         return false;
     } else {
-        return node->value == value
-            || search_internal(node->left, value)
-            || search_internal(node->right, value)
-            ;
+        if(value < node->value) {
+            return search_internal(node->left, value);
+        } else if(value == node->value) {
+            return true;
+        } else {  /* if(value > node->value) */
+            return search_internal(node->right, value);
+        }
     }
 }
 
 bool search(bst& tree, int value) {
     return search_internal(tree.root, value);
+}
+
+
+void remove_internal(node* parent, int value) {
+    if(value < parent->value) {
+        if(parent->left != nullptr) {
+            if(parent->left->value == value) {
+                auto node = parent->left;
+                if(node->left == nullptr && node->right == nullptr) { // 0 child case
+                    parent->left = nullptr;
+                    delete node;
+                } else if(node->left != nullptr && node->right == nullptr) { // 1 child case
+                    parent->left = node->left;
+                    parent->left->parent = parent;
+                    delete node;
+                } else if(node->left == nullptr && node->right != nullptr) { // 1 child case
+                    parent->left = node->right;
+                    parent->left->parent = parent;
+                    delete node;
+                } else { // 2 child case
+                    bst::node* min_of_right_sub_tree = parent->left->right;
+                    while(min_of_right_sub_tree->left!=nullptr) {
+                        min_of_right_sub_tree = min_of_right_sub_tree->left;
+                    }
+                    auto value_of_min_of_right_sub_tree = min_of_right_sub_tree->value;
+                    remove_internal(parent->left, value_of_min_of_right_sub_tree);
+                    node->value = value_of_min_of_right_sub_tree;
+                }
+            } else {
+                remove_internal(parent->left, value);
+            }
+        }
+    } else if(value == parent->value) {
+        throw std::logic_error{"unexpected: we cannot delete parent because we dont know which reference to tweak!"}; 
+    } else { /* if(value > parent->value) */
+        if(parent->right != nullptr) {
+            if(parent->right->value == value) {
+                auto node = parent->right;
+                if(node->left == nullptr && node->right == nullptr) { // 0 child case
+                    parent->right = nullptr;
+                    delete node;
+                }  else if(node->left != nullptr && node->right == nullptr) { // 1 child case
+                    parent->right = node->left;
+                    parent->right->parent = parent;
+                    delete node;
+                } else if(node->left == nullptr && node->right != nullptr) { // 1 child case
+                    parent->right = node->right;
+                    parent->right->parent = parent;
+                    delete node;
+                } else { // 2 child case
+                    bst::node* min_of_right_sub_tree = parent->right->right;
+                    while(min_of_right_sub_tree->left!=nullptr) {
+                        min_of_right_sub_tree = min_of_right_sub_tree->left;
+                    }
+                    auto value_of_min_of_right_sub_tree = min_of_right_sub_tree->value;
+                    remove_internal(parent->right, value_of_min_of_right_sub_tree);
+                    node->value = value_of_min_of_right_sub_tree;
+                }
+            } else {
+                remove_internal(parent->right, value);
+            }
+        }
+    }
+}
+
+void remove(bst& tree, int value) {
+    if(tree.root != nullptr) {
+        if(value == tree.root->value) {
+            auto node = tree.root;
+            if(node->left == nullptr && node->right == nullptr) { // 0 child case
+                tree.root = nullptr;
+                delete node;
+            }  else if(node->left != nullptr && node->right == nullptr) { // 1 child case
+                tree.root = node->left;
+                tree.root->parent = nullptr;
+                delete node;
+            } else if(node->left == nullptr && node->right != nullptr) { // 1 child case
+                tree.root = node->right;
+                tree.root->parent = nullptr;
+                delete node;
+            } else { // 2 child case
+                bst::node* min_of_right_sub_tree = node->right;
+                while(min_of_right_sub_tree->left!=nullptr) {
+                    min_of_right_sub_tree = min_of_right_sub_tree->left;
+                }
+                auto value_of_min_of_right_sub_tree = min_of_right_sub_tree->value;
+                remove_internal(tree.root, value_of_min_of_right_sub_tree);
+                node->value = value_of_min_of_right_sub_tree;
+            }
+        } else {
+            remove_internal(tree.root, value);
+        }
+    }
 }
