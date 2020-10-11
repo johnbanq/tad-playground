@@ -32,6 +32,29 @@ bst::~bst() {
 }
 
 
+struct bst_literal_parser: public literal_parser<bst::node> {
+
+    bst_literal_parser(const std::string& literal, size_t offset)
+        : literal_parser<bst::node>(literal, offset) {}
+
+    bst::node* build_node(int value, bst::node* parent) override {
+        return new bst::node{value, parent, nullptr, nullptr};
+    }
+
+    bst::node* set_child(bst::node* node, bst::node* left, bst::node* right) override {
+        node->left = left;
+        node->right = right;
+        return node;
+    }
+
+};
+
+bst bst_from_literal(const std::string& literal) {
+    bst_literal_parser parser{literal, 0};
+    return bst{parser.parse(nullptr)};
+}
+
+
 void write(const node* root, std::string& str);
 
 std::string to_literal(const bst& tree) {

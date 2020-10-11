@@ -1,18 +1,24 @@
 #ifndef TGI_BST_AVL_H_
 #define TGI_BST_AVL_H_
 
-#include "naive_bst.h"
+#include<string>
+#include<stdexcept>
+#include<vector>
 
-struct avl: public bst {
+struct avl {
 
-    struct node: public bst::node {
+    struct node {
+        int value;
         int height;
+        node* parent;
+        node* left;
+        node* right;
     };
 
     // object semantics, rejects copy
 
     avl(node* root) 
-        :bst(root){}
+        :root(root){}
 
     avl(const avl&) = delete;
     avl& operator=(avl&) = delete;
@@ -20,6 +26,8 @@ struct avl: public bst {
     avl& operator=(avl&&);
     
     ~avl();
+
+    node* root;
 
 };
 
@@ -30,7 +38,7 @@ struct avl: public bst {
  * 
  * \param literal the literal string
  * \throw std::invalid_argument if the literal is invalid
- * \return bst the tree
+ * \return avl the tree
  */
 avl avl_from_literal(const std::string& literal);
 

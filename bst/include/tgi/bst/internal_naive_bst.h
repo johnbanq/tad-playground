@@ -8,6 +8,84 @@
 
 // literal parsing logic // 
 
+template<typename node_type>
+struct literal_parser {
+
+    literal_parser(const std::string& literal, size_t offset)
+        : literal(literal), offset(offset) {}
+
+    virtual ~literal_parser() = default;
+
+
+    node_type* parse(node_type* parent) {
+        if(try_consume("null")) {
+            return nullptr;
+        } else {
+            consume('(');
+            int value = parse_int();
+            if(try_consume(')')) {
+                auto result = build_node(value, parent);
+                return set_child(result, nullptr, nullptr);
+            } else {
+                auto result = build_node(value, parent);
+                consume(':');
+                auto left = parse(result);
+                consume(':');
+                auto right = parse(result);
+                consume(')');
+                return set_child(result, left, right);
+            }
+        }
+    }
+
+    virtual node_type* build_node(int value, node_type* parent) = 0;
+
+    virtual node_type* set_child(node_type* node, node_type* left, node_type* right) = 0;
+
+
+    bool try_consume(char ch) {
+        if(literal[offset]==ch) {
+            offset += 1;
+            return true;
+        } else {
+            return false;   
+        }
+    }
+
+    void consume(char ch) {
+        if(!try_consume(ch)) {
+            throw std::invalid_argument{std::string{"unexpected charactor ["}+literal[offset]+"] found at literal offset="+std::to_string(offset)+", expecting char"+ch};    
+        }
+    }
+
+    bool try_consume(const std::string& str) {
+        if(literal.substr(offset, str.size())==str) {
+            offset += str.size();
+            return true;
+        } else {
+            return false;   
+        }
+    }
+
+    void consume(const std::string& str) {
+        if(!try_consume(str)) {
+            throw std::invalid_argument{std::string{"unexpected charactor ["}+literal[offset]+"] found at literal offset="+std::to_string(offset)+", expecting string "+str};    
+        }
+    }
+
+    int parse_int() {
+        size_t parsed = 0;
+        int value = std::stoi(literal.substr(offset, literal.size()), &parsed, 10);
+        offset += parsed;
+        return value;
+    }
+    
+
+    const std::string& literal;
+    size_t offset;
+
+};
+
 // others //
 
 /**
