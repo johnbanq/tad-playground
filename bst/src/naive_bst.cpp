@@ -115,17 +115,12 @@ void to_graphviz(const bst::node* root, std::string& buffer) {
     if(root!=nullptr) {
         buffer += node_stmt(root->value, root);
         if(root->left != nullptr) {
-            buffer += std::to_string(root->value)+" -> "+std::to_string(root->left->value)+" [label=\"left\"];";
+            buffer += edge_stmt(root->value, root->left->value, "left");
         }
         if(root->right != nullptr) {
-            buffer += std::to_string(root->value)+" -> "+std::to_string(root->right->value)+" [label=\"right\"];";
+            buffer += edge_stmt(root->value, root->right->value, "right");
         }
-
-        if(root->left != nullptr) {
-            to_graphviz(root->left, buffer);
-        }
-        if(root->right != nullptr) {
-            to_graphviz(root->right, buffer);
-        }
+        to_graphviz(root->left, buffer);
+        to_graphviz(root->right, buffer);
     }
 }

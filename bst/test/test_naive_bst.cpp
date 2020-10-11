@@ -62,6 +62,10 @@ TEST_CASE( "node_stmt works", "[bst][visualize]" ) {
     REQUIRE(node_stmt(2, tree.root) == "2[label=\"2("+int_to_hex((uint16_t(tree.root)))+")\"];");
 }
 
+TEST_CASE( "edge_stmt works", "[bst][visualize]" ) {
+    REQUIRE(edge_stmt(2, 1, "left") == "2 -> 1 [label=\"left\"];");
+}
+
 TEST_CASE( "to_graphviz handles null case", "[bst][visualize]" ) {
     REQUIRE(to_graphviz(from_literal("null")) == "digraph bst{}");
 }
@@ -71,12 +75,30 @@ TEST_CASE( "to_graphviz handles root only case", "[bst][visualize]" ) {
     REQUIRE(to_graphviz(tree) == "digraph bst{"+node_stmt(2, tree.root)+"}");
 }
 
-TEST_CASE( "to_graphviz handles handles has child case", "[bst][visualize]" ) {
+TEST_CASE( "to_graphviz handles handles has 1 child case", "[bst][visualize]" ) {
+    auto tree = from_literal("(2:(1):null)");
+    REQUIRE(to_graphviz(tree) == "digraph bst{"
+        + node_stmt(2, tree.root)
+        + edge_stmt(2, 1, "left")
+        + node_stmt(1, tree.root->left)
+        + "}"
+    );
+
+    tree = from_literal("(2:null:(3))");
+    REQUIRE(to_graphviz(tree) == "digraph bst{"
+        + node_stmt(2, tree.root)
+        + edge_stmt(2, 3, "right")
+        + node_stmt(3, tree.root->right)
+        + "}"
+    );
+}
+
+TEST_CASE( "to_graphviz handles handles has 2 child case", "[bst][visualize]" ) {
     auto tree = from_literal("(2:(1):(3))");
     REQUIRE(to_graphviz(tree) == "digraph bst{"
         + node_stmt(2, tree.root)
-        + "2 -> 1 [label=\"left\"];"
-        + "2 -> 3 [label=\"right\"];"
+        + edge_stmt(2, 1, "left")
+        + edge_stmt(2, 3, "right")
         + node_stmt(1, tree.root->left)
         + node_stmt(3, tree.root->right)
         + "}"
