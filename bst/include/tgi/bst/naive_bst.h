@@ -43,7 +43,7 @@ struct bst {
  * \throw std::invalid_argument if the literal is invalid
  * \return bst the tree
  */
-bst from_literal(const std::string& literal);
+bst bst_from_literal(const std::string& literal);
 
 /**
  * \brief construct the literal from the tree

@@ -19,3 +19,10 @@ add_executable(
 )
 target_link_libraries(naive_bst_test PRIVATE Catch2::Catch bst)
 catch_discover_tests(naive_bst_test)
+
+add_executable(
+    avl_test
+    test_avl.cpp
+)
+target_link_libraries(avl_test PRIVATE Catch2::Catch bst)
+catch_discover_tests(avl_test)
