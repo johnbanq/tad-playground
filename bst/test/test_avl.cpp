@@ -91,6 +91,7 @@ TEST_CASE("search works on sample avl", "[avl][search]" ) {
     REQUIRE(search(tree, 20) == false);
 }
 
+// rotate and rabalancing
 
 TEST_CASE("left_rotate works", "[avl][rotate]" ) {
     auto tree = avl_from_literal("(4:(2:null:(3)):(5))");
@@ -120,6 +121,23 @@ TEST_CASE("right_rotate works on root", "[avl][rotate]" ) {
     REQUIRE(to_literal(tree) == "(1:null:(2))");
 }
 
+TEST_CASE("rebalance is no-op on correct node", "[avl][rebalance]" ) {
+    auto tree = avl_from_literal("(2:(1):(3))");
+    rebalance(tree.root);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(2:(1):(3))");
+
+    tree = avl_from_literal("(2:null:(3))");
+    rebalance(tree.root);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(2:null:(3))");
+
+    tree = avl_from_literal("(2:(1):null)");
+    rebalance(tree.root);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(2:(1):null)");
+}
+
 TEST_CASE("rebalance rebalances left-left case", "[avl][rebalance]" ) {
     auto tree = avl_from_literal("(3:(2:(1):null):null)");
     rebalance(tree.root);
@@ -146,4 +164,87 @@ TEST_CASE("rebalance rebalances right-left case", "[avl][rebalance]" ) {
     rebalance(tree.root);
     REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(5:(4):(6))");
+}
+
+// insert test //
+
+TEST_CASE( "insert ignores existing value", "[avl][insert]" ) {
+    auto tree = avl_from_literal("(2)");
+    insert(tree, 2);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(2)");
+}
+
+TEST_CASE( "insert works on empty tree", "[avl][insert]" ) {
+    auto tree = avl_from_literal("null");
+    insert(tree, 2);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(2)");
+}
+
+TEST_CASE( "insert rebalances", "[avl][insert]" ) {
+    auto tree = avl_from_literal("(10:(5):null)");
+    insert(tree, 2);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(5:(2):(10))");
+}
+
+TEST_CASE( "insert rebalances to root", "[avl][insert]" ) {
+    auto tree = avl_from_literal("(6:(4:(3):(5)):(10))");
+    insert(tree, 2);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(4:(3:(2):null):(6:(5):(10)))");
+}
+
+// remove test //
+
+TEST_CASE( "remove accepts non-existent value", "[avl][remove]" ) {
+    auto tree = avl_from_literal("(2:(1):(3))");
+    remove(tree, 10);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(2:(1):(3))");
+}
+
+TEST_CASE( "remove works on no child case", "[avl][remove]" ) {
+    auto tree = avl_from_literal("(2:(1):(3))");
+    remove(tree, 1);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(2:null:(3))");
+
+    remove(tree, 3);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(2)");
+}
+
+TEST_CASE( "remove works on 1 child case", "[avl][remove]" ) {
+    auto tree = avl_from_literal("(2:(1):null)");
+    remove(tree, 2);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(1)");
+
+    tree = avl_from_literal("(2:null:(3))");
+    remove(tree, 2);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(3)");
+}
+
+TEST_CASE( "remove works on 2 child case", "[avl][remove]" ) {
+    auto tree = avl_from_literal("(2:(1):(3))");
+    remove(tree, 2);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(3:(1):null)");
+}
+
+TEST_CASE( "remove rebalances", "[avl][remove]" ) {
+    auto tree = avl_from_literal("(5:(4:(3):null):(10))");
+    remove(tree, 10);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(4:(3):(5))");
+}
+
+TEST_CASE( "remove rebalances to root", "[avl][remove]" ) {
+    auto tree = avl_from_literal("(6:(4:(2):null):(10:(9):(12:null:(13))))");
+    remove(tree, 2);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(10:(6:(4):(9)):(12:null:(13)))");
 }

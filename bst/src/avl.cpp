@@ -197,7 +197,9 @@ void right_rotate(avl::node*& n) {
 
 void rebalance(avl::node*& n) {
     int factor = balance_factor_of(n);
-    if(factor == 2) {
+    if(std::abs(factor) <= 1) {
+        // balanced, no-op
+    } else if(factor == 2) {
         int left_factor = balance_factor_of(n->left);
         if(left_factor == 1) { // left-left case
             right_rotate(n);
@@ -205,7 +207,7 @@ void rebalance(avl::node*& n) {
             left_rotate(n->left);
             right_rotate(n);
         } else {
-            //impossible!
+            //impossible
             throw std::logic_error("unexpected left balance factor: "+std::to_string(factor)); 
         }
     } else if(factor == -2) {
@@ -216,11 +218,92 @@ void rebalance(avl::node*& n) {
             right_rotate(n->right);
             left_rotate(n);
         } else {
-            //impossible!
+            //impossible
             throw std::logic_error("unexpected right balance factor: "+std::to_string(factor)); 
         }
     } else {
-        //impossible!
+        //impossible
         throw std::logic_error("unexpected balance factor: "+std::to_string(factor));
+    }
+}
+
+avl::node** ref_of(avl& tree, avl::node* node) {
+    if(node->parent == nullptr) {
+        if(tree.root == node) {
+            return &tree.root;
+        } else {
+            //impossible
+            throw std::logic_error("invalid node: {"+std::to_string(node->value)+"} is not root and has no parent!");
+        }
+    } else {
+        if(node->parent->left == node) {
+            return &(node->parent->left);
+        } else if(node->parent->right == node) {
+            return &(node->parent->right);
+        } else {
+            //impossible
+            throw std::logic_error("invalid node: {"+std::to_string(node->value)+"} has a parent {"+std::to_string(node->parent->value)+"} but is not any of its child!");
+        }
+    }
+}
+
+void insert(avl& tree, int value) {
+    auto [parent, ref] = locate_parent_and_expected_ref(tree, value);
+    if(*ref == nullptr) {
+        *ref = new node {value, 0, parent, nullptr, nullptr};
+    }
+
+    auto balancing = parent;
+    while(balancing != nullptr) {
+        balancing->height = compute_height(balancing);
+        auto next = balancing->parent; 
+        auto ref = ref_of(tree, balancing);
+        rebalance(*ref);
+        balancing = next;
+    }
+}
+
+void perform_deletion(avl& tree, avl::node* parent, avl::node*& ref) {
+    avl::node* node = ref;
+    auto two_child_case = node->left != nullptr && node->right != nullptr;
+    if(node->left == nullptr && node->right == nullptr) { // 0 child case
+        ref = nullptr;
+        delete node;
+    }  else if(node->left != nullptr && node->right == nullptr) { // 1 child case
+        ref = node->left;
+        ref->parent = parent;
+        delete node;
+    } else if(node->left == nullptr && node->right != nullptr) { // 1 child case
+        ref = node->right;
+        ref->parent = parent;
+        delete node;
+    } else { // 2 child case
+        //we replace the node to delete with the right subtree's smallest element
+        avl::node* victim = node->right;
+        while(victim->left!=nullptr) {
+            victim = victim->left;
+        }
+        int victim_value = victim->value;
+        auto [victim_parent, victim_ref] = locate_parent_and_expected_ref(node, &(node->right), victim_value);
+        perform_deletion(tree, victim_parent, *victim_ref);
+        node->value = victim_value;
+    }
+    //two child's case has been done in deleting victim
+    if(!two_child_case) {
+        auto balancing = parent;
+        while(balancing != nullptr) {
+            balancing->height = compute_height(balancing);
+            auto next = balancing->parent; 
+            auto ref = ref_of(tree, balancing);
+            rebalance(*ref);
+            balancing = next;
+        }
+    }
+}
+
+void remove(avl& tree, int value) {
+    auto [parent, ref] = locate_parent_and_expected_ref(tree, value);
+    if(*ref != nullptr) {
+        perform_deletion(tree, parent, *ref);
     }
 }
