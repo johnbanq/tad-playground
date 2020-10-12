@@ -33,6 +33,20 @@ avl::~avl() {
 }
 
 
+int get_height(const avl::node* n) {
+    return n == nullptr ? -1 : n->height;
+}
+
+int balance_factor_of(const avl::node* n) {
+    int left_height = get_height(n->left);
+    int right_height = get_height(n->right);
+    return left_height - right_height;
+}
+
+int compute_height(const avl::node* n) {
+    return std::max(get_height(n->left), get_height(n->right)) + 1;
+}
+
 struct avl_literal_parser: public literal_parser<avl::node> {
 
     avl_literal_parser(const std::string& literal, size_t offset)
@@ -45,7 +59,7 @@ struct avl_literal_parser: public literal_parser<avl::node> {
     avl::node* set_child(avl::node* node, avl::node* left, avl::node* right) override {
         node->left = left;
         node->right = right;
-        node->height = std::max(left==nullptr?-1:left->height, right==nullptr?-1:right->height) + 1;
+        node->height = compute_height(node);
         return node;
     }
 
@@ -88,7 +102,7 @@ std::string to_graphviz(const avl& tree) {
     return writer.write(tree.root);
 }
 
-#include<iostream>
+
 /**
  * this function shouts the mismatch of recorded and actual height in tree, and will return real height of the node as reference
  */
@@ -112,9 +126,7 @@ int check_height_matches(const node* node, std::vector<std::string>& violations)
  */
 void check_balance(const node* node, std::vector<std::string>& violations) {
     if(node != nullptr) {
-        int left_height = node->left == nullptr ? -1 : node->left->height;
-        int right_height = node->right == nullptr ? -1 : node->right->height;
-        int factor = left_height - right_height;
+        int factor = balance_factor_of(node);
         if(std::abs(factor)>1) {
             violations.push_back("{"+std::to_string(node->value)+"} has a bad balance factor of "+std::to_string(factor));
         }
@@ -123,11 +135,92 @@ void check_balance(const node* node, std::vector<std::string>& violations) {
 
 std::vector<std::string> find_violation(const avl& tree) {
     auto violations = std::vector<std::string>{};
-    find_pointer_violation(tree.root, violations);
-    find_value_violation(tree.root, violations);
+    find_pointer_violation(tree, violations);
+    find_value_violation(tree, violations);
     if(violations.size() == 0) {
         check_height_matches(tree.root, violations);
         check_balance(tree.root, violations);
     }
     return violations;
+}
+
+
+bool search(avl& tree, int value) {
+    auto [parent, ref] = locate_parent_and_expected_ref(tree, value);
+    return (*ref) != nullptr;
+}
+
+
+void left_rotate(avl::node*& n) {
+    auto node = n;
+    auto left = node->left;
+    auto right = node->right;
+    auto rightleft = right->left;
+    auto rightright = right->right;
+
+    n = right;
+    right->parent = node->parent;
+
+    node->right = rightleft;
+    if(rightleft != nullptr) {
+        rightleft->parent = node;
+    }
+
+    right->left = node;
+    node->parent = right;
+
+    node->height = compute_height(node);
+    right->height = compute_height(right);
+}
+
+void right_rotate(avl::node*& n) {
+    auto node = n;
+    auto left = node->left;
+    auto right = node->right;
+    auto leftleft = left->left;
+    auto leftright = left->right;
+
+    n = left;
+    left->parent = node->parent;
+    
+    node->left = leftright;
+    if(leftright != nullptr) {
+        leftright->parent = node;
+    }
+
+    left->right = node;
+    node->parent = left;
+
+    node->height = compute_height(node);
+    left->height = compute_height(left);
+}
+
+void rebalance(avl::node*& n) {
+    int factor = balance_factor_of(n);
+    if(factor == 2) {
+        int left_factor = balance_factor_of(n->left);
+        if(left_factor == 1) { // left-left case
+            right_rotate(n);
+        } else if(left_factor == -1) { // left-right case
+            left_rotate(n->left);
+            right_rotate(n);
+        } else {
+            //impossible!
+            throw std::logic_error("unexpected left balance factor: "+std::to_string(factor)); 
+        }
+    } else if(factor == -2) {
+        int right_factor = balance_factor_of(n->right);
+        if(right_factor == -1) { // right-right case
+            left_rotate(n);
+        } else if(right_factor == 1) { // right-left case
+            right_rotate(n->right);
+            left_rotate(n);
+        } else {
+            //impossible!
+            throw std::logic_error("unexpected right balance factor: "+std::to_string(factor)); 
+        }
+    } else {
+        //impossible!
+        throw std::logic_error("unexpected balance factor: "+std::to_string(factor));
+    }
 }

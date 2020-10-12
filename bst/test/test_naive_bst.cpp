@@ -1,7 +1,6 @@
-#include <vector>
-
 #include "catch.hpp"
 
+#include "test_bst_common.h"
 #include "tgi/bst/naive_bst.h"
 #include "tgi/bst/internal_naive_bst.h"
 
@@ -231,12 +230,6 @@ TEST_CASE( "find_violation rejects error in value recursively", "[bst][verify]" 
 
 // assert utility //
 
-bool is_valid_bst(const bst& tree) {
-    REQUIRE(find_violation(tree) == std::vector<std::string>{});
-    //so we can write REQUIRE(is_valid_bst(tree));
-    return true;
-}
-
 // locate parent and ref test //
 
 TEST_CASE("locate_parent_and_expected_ref locates root correctly", "[bst][locate]" ) {
@@ -282,25 +275,25 @@ TEST_CASE("search works on sample tree", "[bst][search]" ) {
 TEST_CASE( "insert ignores duplicate value", "[bst][insert]" ) {
     auto tree = bst_from_literal("(2)");
     insert(tree, 2);
-    REQUIRE(is_valid_bst(tree));
+    REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(2)");
 }
 
 TEST_CASE( "insert works on empty tree", "[bst][insert]" ) {
     auto tree = bst_from_literal("null");
     insert(tree, 2);
-    REQUIRE(is_valid_bst(tree));
+    REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(2)");
 }
 
 TEST_CASE( "insert works on sample tree", "[bst][insert]" ) {
     auto tree = bst_from_literal("(10:(4:(3):null):(15:null:(17)))");
     insert(tree, 5);
-    REQUIRE(is_valid_bst(tree));
+    REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(10:(4:(3):(5)):(15:null:(17)))");
 
     insert(tree, 12);
-    REQUIRE(is_valid_bst(tree));
+    REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(10:(4:(3):(5)):(15:(12):(17)))");
 }
 
@@ -309,37 +302,37 @@ TEST_CASE( "insert works on sample tree", "[bst][insert]" ) {
 TEST_CASE( "remove accepts non-existent value", "[bst][remove]" ) {
     auto tree = bst_from_literal("(2:(1):(3))");
     remove(tree, 10);
-    REQUIRE(is_valid_bst(tree));
+    REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(2:(1):(3))");
 }
 
 TEST_CASE( "remove works on no child case", "[bst][remove]" ) {
     auto tree = bst_from_literal("(2:(1):(3))");
     remove(tree, 1);
-    REQUIRE(is_valid_bst(tree));
+    REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(2:null:(3))");
 
     remove(tree, 3);
-    REQUIRE(is_valid_bst(tree));
+    REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(2)");
 }
 
 TEST_CASE( "remove works on 1 child case", "[bst][remove]" ) {
     auto tree = bst_from_literal("(2:(1):null)");
     remove(tree, 2);
-    REQUIRE(is_valid_bst(tree));
+    REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(1)");
 
     tree = bst_from_literal("(2:null:(3))");
     remove(tree, 2);
-    REQUIRE(is_valid_bst(tree));
+    REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(3)");
 }
 
 TEST_CASE( "remove works on 2 child case", "[bst][remove]" ) {
     auto tree = bst_from_literal("(2:(1):(3))");
     remove(tree, 2);
-    REQUIRE(is_valid_bst(tree));
+    REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(3:(1):null)");
 }
 

@@ -89,30 +89,11 @@ std::string to_graphviz(const bst& tree) {
 
 std::vector<std::string> find_violation(const bst& tree) {
     auto violations = std::vector<std::string>{};
-    find_pointer_violation(tree.root, violations);
-    find_value_violation(tree.root, violations);
+    find_pointer_violation(tree, violations);
+    find_value_violation(tree, violations);
     return violations;
 }
 
-
-std::pair<node*, node**> locate_parent_and_expected_ref(bst::node* parent, bst::node** source_ref, int value) {
-    bst::node* node = *source_ref;
-    if(node == nullptr) {
-        return std::make_pair(parent, source_ref);
-    } else {
-        if(value < node->value) {
-            return locate_parent_and_expected_ref(node, &(node->left), value);
-        } else if(value == node->value) {
-            return std::make_pair(parent, source_ref);
-        } else {
-            return locate_parent_and_expected_ref(node, &(node->right), value);
-        }
-    }
-} 
-
-std::pair<node*, node**> locate_parent_and_expected_ref(bst& tree, int value) {
-    return locate_parent_and_expected_ref(nullptr, &(tree.root), value);
-} 
 
 bool search(bst& tree, int value) {
     auto [parent, ref] = locate_parent_and_expected_ref(tree, value);

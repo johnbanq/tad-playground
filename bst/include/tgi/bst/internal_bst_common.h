@@ -189,11 +189,9 @@ void find_pointer_violation_on_node(const node_type* node, std::vector<std::stri
     }
 }
 
-/**
- * same as on_node variant, but starts from tree root and will check root's parent
- */
-template<typename node_type>
-void find_pointer_violation(const node_type* root, std::vector<std::string>& violations) {
+template<typename tree_type>
+void find_pointer_violation(const tree_type& tree, std::vector<std::string>& violations) {
+    auto root = tree.root;
     if(root != nullptr && root->parent != nullptr) {
         violations.push_back("root's parent must be null!");
     }
@@ -224,9 +222,39 @@ void find_value_violation_on_node(const node_type* node, int min, int max, std::
     }
 }
 
-template<typename node_type>
-void find_value_violation(const node_type* root, std::vector<std::string>& violations) {
-    return find_value_violation_on_node(root, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), violations);
+template<typename tree_type>
+void find_value_violation(const tree_type& tree, std::vector<std::string>& violations) {
+    return find_value_violation_on_node(tree.root, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), violations);
 }
+
+// parent and ref locator //
+
+template<typename node_type>
+std::pair<node_type*, node_type**> locate_parent_and_expected_ref(node_type* parent, node_type** source_ref, int value) {
+    node_type* node = *source_ref;
+    if(node == nullptr) {
+        return std::make_pair(parent, source_ref);
+    } else {
+        if(value < node->value) {
+            return locate_parent_and_expected_ref(node, &(node->left), value);
+        } else if(value == node->value) {
+            return std::make_pair(parent, source_ref);
+        } else {
+            return locate_parent_and_expected_ref(node, &(node->right), value);
+        }
+    }
+} 
+
+template<typename tree_type>
+using node_ptr_type_of = decltype(((tree_type*)nullptr)->root);
+
+/**
+ * this function, and its recursive case overload locates the parent and ref(pointer to pointer that should point to the node) of the node
+ */
+template<typename tree_type>
+std::pair<node_ptr_type_of<tree_type>, node_ptr_type_of<tree_type>*> locate_parent_and_expected_ref(tree_type& tree, int value) {
+    return locate_parent_and_expected_ref((node_ptr_type_of<tree_type>)nullptr, &(tree.root), value);
+} 
+
 
 #endif
