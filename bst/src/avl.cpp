@@ -87,3 +87,47 @@ std::string to_graphviz(const avl& tree) {
     avl_graphviz_writer writer;
     return writer.write(tree.root);
 }
+
+#include<iostream>
+/**
+ * this function shouts the mismatch of recorded and actual height in tree, and will return real height of the node as reference
+ */
+int check_height_matches(const node* node, std::vector<std::string>& violations) {
+    if(node != nullptr) {
+        int left = check_height_matches(node->left, violations);
+        int right = check_height_matches(node->right, violations);
+        int expected_height = std::max(left, right)+1;
+        if(node->height!=expected_height) {
+            violations.push_back("{"+std::to_string(node->value)+"} has wrong height="+std::to_string(node->height)+", should be height="+std::to_string(expected_height));
+        }
+        return expected_height;
+    } else {
+        //so leaf will have 0
+        return -1;
+    }
+}
+
+/**
+ * this function shouts node with bad balance factor (not +1,0,-1)
+ */
+void check_balance(const node* node, std::vector<std::string>& violations) {
+    if(node != nullptr) {
+        int left_height = node->left == nullptr ? -1 : node->left->height;
+        int right_height = node->right == nullptr ? -1 : node->right->height;
+        int factor = left_height - right_height;
+        if(std::abs(factor)>1) {
+            violations.push_back("{"+std::to_string(node->value)+"} has a bad balance factor of "+std::to_string(factor));
+        }
+    }
+}
+
+std::vector<std::string> find_violation(const avl& tree) {
+    auto violations = std::vector<std::string>{};
+    find_pointer_violation(tree.root, violations);
+    find_value_violation(tree.root, violations);
+    if(violations.size() == 0) {
+        check_height_matches(tree.root, violations);
+        check_balance(tree.root, violations);
+    }
+    return violations;
+}
