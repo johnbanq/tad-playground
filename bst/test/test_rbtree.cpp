@@ -66,3 +66,8 @@ TEST_CASE( "find_violation rejects red root", "[rbtree][verify]" ) {
     auto tree = rbtree_from_literal("(2R)");
     REQUIRE(find_violation(tree) == std::vector<std::string>{"root must not be red"});
 }
+
+TEST_CASE( "find_violation rejects red child of red node", "[rbtree][verify]" ) {
+    auto tree = rbtree_from_literal("(4B:(2R:(1R):(3B)):(6B:(5B):(7B)))");
+    REQUIRE(find_violation(tree) == std::vector<std::string>{"red node {2}'s child {1} cannot be a red node!"});
+}

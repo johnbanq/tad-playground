@@ -109,12 +109,32 @@ void find_red_root_violation(const rbtree& tree, std::vector<std::string>& viola
     }
 }
 
+void find_red_child_of_red_violation_internal(rbtree::node* node, std::vector<std::string>& violations) {
+    if(node != nullptr) {
+        if(color_of(node) == rbtree::color::red) {
+            if(color_of(node->left) == rbtree::color::red) {
+                violations.push_back("red node {"+std::to_string(node->value)+"}'s child {"+std::to_string(node->left->value)+"} cannot be a red node!");
+            }
+            if(color_of(node->right) == rbtree::color::red) {
+                violations.push_back("red node {"+std::to_string(node->value)+"}'s child {"+std::to_string(node->right->value)+"} cannot be a red node!");
+            }
+        }
+        find_red_child_of_red_violation_internal(node->left, violations);
+        find_red_child_of_red_violation_internal(node->right, violations);
+    }
+}
+
+void find_red_child_of_red_violation(const rbtree& tree, std::vector<std::string>& violations) {
+    find_red_child_of_red_violation_internal(tree.root, violations);
+}
+
 std::vector<std::string> find_violation(const rbtree& tree) {
     auto violations = std::vector<std::string>{};
     find_pointer_violation(tree, violations);
     find_value_violation(tree, violations);
     if(violations.size() == 0) {
         find_red_root_violation(tree, violations);
+        find_red_child_of_red_violation(tree, violations);
     }
     return violations;
 }
