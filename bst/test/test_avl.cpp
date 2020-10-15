@@ -248,3 +248,25 @@ TEST_CASE( "remove rebalances to root", "[avl][remove]" ) {
     REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(10:(6:(4):(9)):(12:null:(13)))");
 }
+
+
+TEST_CASE( "count works on empty tree", "[avl][count]" ) {
+    auto tree = avl_from_literal("null");
+    REQUIRE(count(tree)==0);
+}
+
+TEST_CASE( "count works on tree", "[avl][count]" ) {
+    auto tree = avl_from_literal("(2:(1):(3))");
+    REQUIRE(count(tree)==3);
+}
+
+TEST_CASE( "list_all works on empty tree", "[avl][list_all]" ) {
+    auto tree = avl_from_literal("null");
+    REQUIRE(list_all(tree)==std::vector<int>{});
+}
+
+TEST_CASE( "list_all works on tree", "[avl][list_all]" ) {
+    auto tree = avl_from_literal("(2:(1):(3))");
+    REQUIRE(list_all(tree)==std::vector<int>{1,2,3});
+}
+

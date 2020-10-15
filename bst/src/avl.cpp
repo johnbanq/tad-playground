@@ -206,9 +206,11 @@ void rebalance(avl::node*& n) {
         } else if(left_factor == -1) { // left-right case
             left_rotate(n->left);
             right_rotate(n);
+        } else if(left_factor == 0) { // tie, whatever you wish
+            right_rotate(n);
         } else {
             //impossible
-            throw std::logic_error("unexpected left balance factor: "+std::to_string(factor)); 
+            throw std::logic_error("unexpected left balance factor on {"+std::to_string(n->left->value)+"}: "+std::to_string(left_factor)); 
         }
     } else if(factor == -2) {
         int right_factor = balance_factor_of(n->right);
@@ -217,13 +219,15 @@ void rebalance(avl::node*& n) {
         } else if(right_factor == 1) { // right-left case
             right_rotate(n->right);
             left_rotate(n);
+        } else if(right_factor == 0) { // tie, whatever you wish
+            left_rotate(n);
         } else {
             //impossible
-            throw std::logic_error("unexpected right balance factor: "+std::to_string(factor)); 
+            throw std::logic_error("unexpected right balance factor on {"+std::to_string(n->right->value)+"}: "+std::to_string(right_factor)); 
         }
     } else {
         //impossible
-        throw std::logic_error("unexpected balance factor: "+std::to_string(factor));
+        throw std::logic_error("unexpected balance factor on {"+std::to_string(n->value)+"}: "+std::to_string(factor));
     }
 }
 
@@ -306,4 +310,32 @@ void remove(avl& tree, int value) {
     if(*ref != nullptr) {
         perform_deletion(tree, parent, *ref);
     }
+}
+
+
+unsigned int count_internal(avl::node* root) {
+    if(root != nullptr) {
+        return 1 + count_internal(root->left) + count_internal(root->right); 
+    } else {
+        return 0;
+    }
+}
+
+unsigned int count(avl& tree) {
+    return count_internal(tree.root);
+}
+
+
+void list_all_internal(avl::node* root, std::vector<int>& elems) {
+    if(root!=nullptr) {
+        list_all_internal(root->left, elems);
+        elems.push_back(root->value);
+        list_all_internal(root->right, elems);
+    }
+}
+
+std::vector<int> list_all(avl& tree) {
+    std::vector<int> elems;
+    list_all_internal(tree.root, elems);
+    return elems;
 }

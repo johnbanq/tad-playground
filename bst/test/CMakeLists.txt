@@ -26,3 +26,10 @@ add_executable(
 )
 target_link_libraries(avl_test PRIVATE Catch2::Catch bst)
 catch_discover_tests(avl_test)
+
+add_executable(
+    avl_tampering_test
+    avl_tampering.cpp
+)
+target_link_libraries(avl_tampering_test PRIVATE Catch2::Catch bst)
+catch_discover_tests(avl_tampering_test)

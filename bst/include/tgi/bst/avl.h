@@ -17,6 +17,9 @@ struct avl {
 
     // object semantics, rejects copy
 
+    avl() 
+        :root(nullptr){}
+
     avl(node* root) 
         :root(root){}
 
@@ -91,5 +94,21 @@ bool search(avl& tree, int value);
  * \param value the value to remove
  */
 void remove(avl& tree, int value);
+
+/**
+ * \brief count the amount of element in tree
+ * 
+ * \param tree the tree
+ * \return unsigned int element amount
+ */
+unsigned int count(avl& tree);
+
+/**
+ * \brief list all elements in sorted order
+ * 
+ * \param tree the tree
+ * \return std::vector<int> the elements 
+ */
+std::vector<int> list_all(avl& tree);
 
 #endif
