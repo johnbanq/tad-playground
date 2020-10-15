@@ -96,3 +96,5 @@ std::string to_graphviz(const rbtree& tree) {
     rbtree_graphviz_writer writer;
     return writer.write(tree.root);
 }
+
+
