@@ -25,7 +25,7 @@ void shuffle(std::vector<int>& vector) {
     std::shuffle(vector.begin(), vector.end(), e1);
 }
 
-TEST_CASE( "insert 1000 random value 1000 times", "[avl][tamper]" ) {
+TEST_CASE( "insert 1000 random value 1000 times", "[.][avl][tamper]" ) {
     const int experiment_time = 1000;
     const int length_of_experiment = 1000;
 
@@ -71,7 +71,7 @@ TEST_CASE( "insert 1000 random value 1000 times", "[avl][tamper]" ) {
 }
 
 #include<iostream>
-TEST_CASE( "remove all element from 1000 random element avl 1000 times", "[avl][tamper]" ) {
+TEST_CASE( "remove all element from 1000 random element avl 1000 times", "[.][avl][tamper]" ) {
     const int experiment_time = 1000;
     const int length_of_experiment = 1000;
 
