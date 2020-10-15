@@ -18,6 +18,7 @@ add_library(
     bst
         src/naive_bst.cpp
         src/avl.cpp
+        src/rbtree.cpp
 )
 target_include_directories(bst PUBLIC include)
 target_compile_features(bst PUBLIC cxx_std_17)

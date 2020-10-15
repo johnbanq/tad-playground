@@ -33,3 +33,10 @@ add_executable(
 )
 target_link_libraries(avl_tampering_test PRIVATE Catch2::Catch bst)
 catch_discover_tests(avl_tampering_test)
+
+add_executable(
+    rbtree_test
+    test_rbtree.cpp
+)
+target_link_libraries(rbtree_test PRIVATE Catch2::Catch bst)
+catch_discover_tests(rbtree_test)

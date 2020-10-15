@@ -1,0 +1,8 @@
+#ifndef TGI_BST_INTERNAL_RBTREE_H_
+#define TGI_BST_INTERNAL_RBTREE_H_
+
+#include "tgi/bst/rbtree.h"
+#include "tgi/bst/hex_util.h"
+#include "tgi/bst/internal_bst_common.h"
+
+#endif
