@@ -22,7 +22,7 @@ TEST_CASE( "to_literal works on avl", "[avl][literal]" ) {
 
 TEST_CASE( "avl_node_stmt works", "[avl][visualize]" ) {
     auto tree = avl_from_literal("(2)");
-    REQUIRE(avl_node_stmt(tree.root) == "2[label=\"2(h:0)(a:"+int_to_hex((uint16_t(tree.root)))+")\"];");
+    REQUIRE(avl_node_stmt(tree.root) == "2[label=\"2(h:0)(a:"+addr_string(tree.root)+")\"];");
 }
 
 TEST_CASE( "to_graphviz works on avl", "[avl][visualize]" ) {

@@ -35,11 +35,8 @@ struct bst_literal_parser: public literal_parser<bst::node, int> {
         return parse_int();
     }
 
-    bst::node* build_node(int value) override {
-        return new bst::node{value, nullptr, nullptr, nullptr};
-    }
-
-    bst::node* set_child(bst::node* node, bst::node* left, bst::node* right) override {
+    bst::node* build_node(int value, bst::node* left, bst::node* right) override {
+        auto node = new bst::node{value, nullptr, nullptr, nullptr};
         node->left = left;
         if(left!=nullptr) {
             left->parent = node;
@@ -55,7 +52,7 @@ struct bst_literal_parser: public literal_parser<bst::node, int> {
 
 bst bst_from_literal(const std::string& literal) {
     bst_literal_parser parser{literal, 0};
-    return bst{parser.parse(nullptr)};
+    return bst{parser.parse()};
 }
 
 struct bst_literal_writer: public literal_writer<bst::node> {

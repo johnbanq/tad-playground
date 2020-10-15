@@ -15,8 +15,8 @@
  * 
  *  nodeLiteral = "null" | ($VALUE$) | ($VALUE$:nodeLiteral:nodeLiteral)
  * 
- * the parsing of $VALUE$ is the job of parse value
- * the parsed value will then be sent to build_node w/ parent to build node, then recursive on child and then establish parent-child relation with their child
+ * the parsing of $VALUE$ is the job of parse_value
+ * the parsed value and child node will then be fed into build_node to new a node and establish parent-child relation
  * 
  */
 template<typename node_type, typename value_type>
@@ -28,23 +28,21 @@ struct literal_parser {
     virtual ~literal_parser() = default;
 
 
-    node_type* parse(node_type* parent) {
+    node_type* parse() {
         if(try_consume("null")) {
             return nullptr;
         } else {
             consume('(');
             auto value = parse_value();
             if(try_consume(')')) {
-                auto result = build_node(value);
-                return set_child(result, nullptr, nullptr);
+                return build_node(std::move(value), nullptr, nullptr);
             } else {
-                auto result = build_node(std::move(value));
                 consume(':');
-                auto left = parse(result);
+                auto left = parse();
                 consume(':');
-                auto right = parse(result);
+                auto right = parse();
                 consume(')');
-                return set_child(result, left, right);
+                return build_node(std::move(value), left, right);
             }
         }
     }
@@ -52,9 +50,7 @@ struct literal_parser {
 
     virtual value_type parse_value() = 0;
 
-    virtual node_type* build_node(value_type value) = 0;
-
-    virtual node_type* set_child(node_type* node, node_type* left, node_type* right) = 0;
+    virtual node_type* build_node(value_type value, node_type* left, node_type* right) = 0;
 
 
     bool try_consume(char ch) {
