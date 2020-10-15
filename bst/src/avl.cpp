@@ -40,10 +40,14 @@ int compute_height(const avl::node* n) {
     return std::max(get_height(n->left), get_height(n->right)) + 1;
 }
 
-struct avl_literal_parser: public literal_parser<avl::node> {
+struct avl_literal_parser: public literal_parser<avl::node, int> {
 
     avl_literal_parser(const std::string& literal, size_t offset)
-        : literal_parser<avl::node>(literal, offset) {}
+        : literal_parser<avl::node, int>(literal, offset) {}
+
+    virtual int parse_value() override {
+        return parse_int();
+    }
 
     avl::node* build_node(int value, avl::node* parent) override {
         return new avl::node{value, 0, parent, nullptr, nullptr};

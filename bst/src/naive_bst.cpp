@@ -26,10 +26,14 @@ bst::~bst() {
 }
 
 
-struct bst_literal_parser: public literal_parser<bst::node> {
+struct bst_literal_parser: public literal_parser<bst::node, int> {
 
     bst_literal_parser(const std::string& literal, size_t offset)
-        : literal_parser<bst::node>(literal, offset) {}
+        : literal_parser<bst::node, int>(literal, offset) {}
+
+    virtual int parse_value() override {
+        return parse_int();
+    }
 
     bst::node* build_node(int value, bst::node* parent) override {
         return new bst::node{value, parent, nullptr, nullptr};

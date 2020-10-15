@@ -10,7 +10,16 @@
 
 // literal parsing logic //
 
-template<typename node_type>
+/**
+ * \brief parser class to parse a bst from literal:
+ * 
+ *  nodeLiteral = "null" | ($VALUE$) | ($VALUE$:nodeLiteral:nodeLiteral)
+ * 
+ * the parsing of $VALUE$ is the job of parse value
+ * the parsed value will then be sent to build_node w/ parent to build node, then recursive on child and then establish parent-child relation with their child
+ * 
+ */
+template<typename node_type, typename value_type>
 struct literal_parser {
 
     literal_parser(const std::string& literal, size_t offset)
@@ -24,12 +33,12 @@ struct literal_parser {
             return nullptr;
         } else {
             consume('(');
-            int value = parse_int();
+            auto value = parse_value();
             if(try_consume(')')) {
                 auto result = build_node(value, parent);
                 return set_child(result, nullptr, nullptr);
             } else {
-                auto result = build_node(value, parent);
+                auto result = build_node(std::move(value), parent);
                 consume(':');
                 auto left = parse(result);
                 consume(':');
@@ -40,7 +49,10 @@ struct literal_parser {
         }
     }
 
-    virtual node_type* build_node(int value, node_type* parent) = 0;
+
+    virtual value_type parse_value() = 0;
+
+    virtual node_type* build_node(value_type value, node_type* parent) = 0;
 
     virtual node_type* set_child(node_type* node, node_type* left, node_type* right) = 0;
 
@@ -56,7 +68,7 @@ struct literal_parser {
 
     void consume(char ch) {
         if(!try_consume(ch)) {
-            throw std::invalid_argument{std::string{"unexpected charactor ["}+literal[offset]+"] found at literal offset="+std::to_string(offset)+", expecting char"+ch};    
+            fail("char "+ch);  
         }
     }
 
@@ -65,13 +77,13 @@ struct literal_parser {
             offset += str.size();
             return true;
         } else {
-            return false;   
+            return false;
         }
     }
 
     void consume(const std::string& str) {
         if(!try_consume(str)) {
-            throw std::invalid_argument{std::string{"unexpected charactor ["}+literal[offset]+"] found at literal offset="+std::to_string(offset)+", expecting string "+str};    
+            fail("string "+str);
         }
     }
 
@@ -81,7 +93,14 @@ struct literal_parser {
         offset += parsed;
         return value;
     }
-    
+
+    void fail(const std::string& expected) {
+        fail(std::string{"charactor ["}+literal[offset]+"]", expected);
+    }
+
+    void fail(const std::string& unexpected, const std::string& expected) {
+        throw std::invalid_argument{std::string{"unexpected +"+unexpected+"+ found at literal offset="+std::to_string(offset)+", expecting "+expected}};
+    }
 
     const std::string& literal;
     size_t offset;

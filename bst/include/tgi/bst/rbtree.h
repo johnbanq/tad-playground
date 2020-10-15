@@ -38,4 +38,17 @@ struct rbtree {
 
 };
 
+/**
+ * \brief generates a rbtree from literal:
+ * 
+ * literal is same as the bst version, but the node value must end with character R or B to indicate node color: 
+ *  (7B:(1B):(9B)) means a (7:(1):(9)) with all nodes black  
+ * 
+ * \param literal the literal string
+ * \throw std::invalid_argument if the literal is invalid
+ * \return rbtree the tree
+ */
+rbtree rbtree_from_literal(const std::string& literal);
+
+
 #endif
