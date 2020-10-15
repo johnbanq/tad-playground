@@ -66,4 +66,12 @@ std::string to_literal(const rbtree& tree);
  */
 std::string to_graphviz(const rbtree& tree);
 
+/**
+ * \brief check the validity of the rbtree
+ * 
+ * \param tree the tree to check
+ * \return std::vector<std::string> the detected violations, empty if none 
+ */
+std::vector<std::string> find_violation(const rbtree& tree);
+
 #endif

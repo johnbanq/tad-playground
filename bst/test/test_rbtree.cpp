@@ -62,3 +62,7 @@ TEST_CASE( "find_violation will only check avl constraint if have no bst violati
     REQUIRE(find_violation(tree).size() == 1);
 }
 
+TEST_CASE( "find_violation rejects red root", "[rbtree][verify]" ) {
+    auto tree = rbtree_from_literal("(2R)");
+    REQUIRE(find_violation(tree) == std::vector<std::string>{"root must not be red"});
+}

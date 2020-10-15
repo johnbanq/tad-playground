@@ -80,6 +80,7 @@ std::string to_literal(const rbtree& tree) {
     return str;
 }
 
+
 struct rbtree_graphviz_writer: public graphviz_writer<rbtree::node> {
 
     virtual void write_node(const rbtree::node* node, std::string& buffer) override {
@@ -97,4 +98,24 @@ std::string to_graphviz(const rbtree& tree) {
     return writer.write(tree.root);
 }
 
+
+rbtree::color color_of(const rbtree::node* n) {
+    return n == nullptr ? rbtree::color::black : n->color;
+}
+
+void find_red_root_violation(const rbtree& tree, std::vector<std::string>& violations) {
+    if(color_of(tree.root)!=rbtree::color::black) {
+        violations.push_back("root must not be red");
+    }
+}
+
+std::vector<std::string> find_violation(const rbtree& tree) {
+    auto violations = std::vector<std::string>{};
+    find_pointer_violation(tree, violations);
+    find_value_violation(tree, violations);
+    if(violations.size() == 0) {
+        find_red_root_violation(tree, violations);
+    }
+    return violations;
+}
 
