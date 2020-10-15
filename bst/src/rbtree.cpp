@@ -1,7 +1,7 @@
 #include <algorithm>
 
 #include "tgi/bst/rbtree.h"
-#include "tgi/bst/internal_rbtree.h"
+#include "tgi/bst/internal/internal_rbtree.h"
 
 
 using node = rbtree::node;

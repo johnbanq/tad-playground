@@ -4,7 +4,7 @@
 #include<utility>
 
 #include "tgi/bst/hex_util.h"
-#include "tgi/bst/internal_bst_common.h"
+#include "tgi/bst/internal/internal_bst_common.h"
 #include "tgi/bst/naive_bst.h"
 
 #endif

@@ -1,8 +1,8 @@
 #include <algorithm>
 
 #include "tgi/bst/avl.h"
-#include "tgi/bst/internal_avl.h"
-#include "tgi/bst/internal_naive_bst.h"
+#include "tgi/bst/internal/internal_avl.h"
+#include "tgi/bst/internal/internal_bst_common.h"
 
 
 using node = avl::node;

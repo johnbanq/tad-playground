@@ -2,7 +2,7 @@
 
 #include "test_bst_common.h"
 #include "tgi/bst/naive_bst.h"
-#include "tgi/bst/internal_naive_bst.h"
+#include "tgi/bst/internal/internal_naive_bst.h"
 
 // naive bst test //
 

@@ -4,7 +4,7 @@
 
 #include "test_bst_common.h"
 #include "tgi/bst/avl.h"
-#include "tgi/bst/internal_avl.h"
+#include "tgi/bst/internal/internal_avl.h"
 
 
 TEST_CASE( "from_literal works on avl", "[avl][literal]" ) {

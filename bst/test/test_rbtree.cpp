@@ -4,7 +4,7 @@
 
 #include "test_bst_common.h"
 #include "tgi/bst/rbtree.h"
-#include "tgi/bst/internal_rbtree.h"
+#include "tgi/bst/internal/internal_rbtree.h"
 
 using color = rbtree::color;
 
@@ -45,3 +45,4 @@ TEST_CASE( "to_graphviz works on rbtree", "[rbtree][visualize]" ) {
         + "}"
     );
 }
+
