@@ -85,7 +85,7 @@ TEST_CASE( "to_literal performs recursively", "[bst][literal]" ) {
 
 TEST_CASE( "node_stmt works", "[bst][visualize]" ) {
     auto tree = bst_from_literal("(2)");
-    REQUIRE(node_stmt(2, tree.root) == "2[label=\"2("+int_to_hex((uint16_t(tree.root)))+")\"];");
+    REQUIRE(node_stmt(2, tree.root) == "2[label=\"2("+addr_string(tree.root)+")\"];");
 }
 
 TEST_CASE( "edge_stmt works", "[bst][visualize]" ) {
@@ -172,7 +172,7 @@ TEST_CASE( "parent_violation works", "[bst][verify]" ) {
     auto parent = tree.root;
     auto child = tree.root->left;
     child->parent = parent->right;
-    REQUIRE(parent_violation(parent, child) == "node {"+std::to_string(child->value)+"}'s parent should point to {"+int_to_hex((uint16_t)parent)+"}, not {"+int_to_hex((uint16_t)child->parent)+"}");
+    REQUIRE(parent_violation(parent, child) == "node {"+std::to_string(child->value)+"}'s parent should point to {"+addr_string(parent)+"}, not {"+addr_string(child->parent)+"}");
 }
 
 

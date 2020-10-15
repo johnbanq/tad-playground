@@ -152,10 +152,17 @@ struct graphviz_writer {
 };
 
 /**
+ * turns pointer address to 2Byte value for ease of presentation
+ */
+static std::string addr_string(const void* addr) {
+    return int_to_hex((uint16_t(uint64_t(addr))));
+}
+
+/**
  * generic write function for write_node
  */
 static std::string node_stmt(int value, const void* addr) {
-    return std::to_string(value)+"[label=\""+std::to_string(value)+"("+int_to_hex((uint16_t(addr)))+")\"];";
+    return std::to_string(value)+"[label=\""+std::to_string(value)+"("+addr_string(addr)+")\"];";
 }
 
 /**
@@ -168,6 +175,17 @@ static std::string edge_stmt(int from, int to, const std::string& edge) {
     }
     stmt += ";";
     return stmt;
+}
+
+// recursive delete //
+
+template<typename node_type>
+void delete_tree(node_type* n) {
+    if(n!=nullptr) {
+        delete_tree(n->left);
+        delete_tree(n->right);
+        delete n;
+    }
 }
 
 // violation check util //
@@ -200,7 +218,7 @@ void find_pointer_violation(const tree_type& tree, std::vector<std::string>& vio
 
 template<typename node_type>
 static std::string parent_violation(const node_type* parent, const node_type* child) {
-    return "node {"+std::to_string(child->value)+"}'s parent should point to {"+int_to_hex((uint16_t)parent)+"}, not {"+int_to_hex((uint16_t)child->parent)+"}";
+    return "node {"+std::to_string(child->value)+"}'s parent should point to {"+addr_string(parent)+"}, not {"+addr_string(child->parent)+"}";
 }
 
 

@@ -7,13 +7,6 @@
 
 using node = avl::node;
 
-void delete_tree(node* n) {
-    if(n!=nullptr) {
-        delete_tree(n->left);
-        delete_tree(n->right);
-        delete n;
-    }
-}
 
 avl::avl(avl&& other)
     :root(nullptr) {

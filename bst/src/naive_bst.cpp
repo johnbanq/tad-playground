@@ -4,15 +4,9 @@
 
 #include <limits>
 
+
 using node = bst::node;
 
-void delete_tree(node* n) {
-    if(n!=nullptr) {
-        delete_tree(n->left);
-        delete_tree(n->right);
-        delete n;
-    }
-}
 
 bst::bst(bst&& other)
     :root(nullptr) {
