@@ -26,9 +26,10 @@ TEST_CASE( "to_literal works on rbtree", "[rbtree][literal]" ) {
 
 TEST_CASE( "rbtree_node_stmt works", "[rbtree][visualize]" ) {
     auto tree = rbtree_from_literal("(2R)");
-    REQUIRE(rbtree_node_stmt(tree.root) == "2[label=\"2(h:0)(a:"+addr_string(tree.root)+")\"][color=red];");
-    auto tree = rbtree_from_literal("(2B)");
-    REQUIRE(rbtree_node_stmt(tree.root) == "2[label=\"2(h:0)(a:"+addr_string(tree.root)+")\"][color=black];");
+    REQUIRE(rbtree_node_stmt(tree.root) == "2[label=\"2("+addr_string(tree.root)+")\"][color=red];");
+    
+    tree = rbtree_from_literal("(2B)");
+    REQUIRE(rbtree_node_stmt(tree.root) == "2[label=\"2("+addr_string(tree.root)+")\"][color=black];");
 }
 
 TEST_CASE( "to_graphviz works on rbtree", "[rbtree][visualize]" ) {
