@@ -79,3 +79,20 @@ std::string to_literal(const rbtree& tree) {
     writer.write(tree.root, str);
     return str;
 }
+
+struct rbtree_graphviz_writer: public graphviz_writer<rbtree::node> {
+
+    virtual void write_node(const rbtree::node* node, std::string& buffer) override {
+        buffer += rbtree_node_stmt(node);
+    }
+
+    virtual void write_edge(const rbtree::node* from, const rbtree::node* to, const std::string& type, std::string& buffer) override {
+        buffer += edge_stmt(from->value, to->value, type);
+    }
+
+};
+
+std::string to_graphviz(const rbtree& tree) {
+    rbtree_graphviz_writer writer;
+    return writer.write(tree.root);
+}
