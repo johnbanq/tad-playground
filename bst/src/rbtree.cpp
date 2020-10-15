@@ -62,3 +62,20 @@ rbtree rbtree_from_literal(const std::string& literal) {
     rbtree_literal_parser parser{literal, 0};
     return rbtree{parser.parse()};
 }
+
+
+struct rbtree_literal_writer: public literal_writer<rbtree::node> {
+
+    virtual void write_value(const rbtree::node* root, std::string& str) override {
+        str += std::to_string(root->value);
+        str += root->color == rbtree::color::black ? 'B' : 'R';
+    }
+
+};
+
+std::string to_literal(const rbtree& tree) {
+    rbtree_literal_writer writer;
+    std::string str;
+    writer.write(tree.root, str);
+    return str;
+}

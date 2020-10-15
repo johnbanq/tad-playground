@@ -50,5 +50,12 @@ struct rbtree {
  */
 rbtree rbtree_from_literal(const std::string& literal);
 
+/**
+ * \brief construct the literal from the tree
+ * 
+ * \param tree the tree
+ * \return std::string the constructed literal
+ */
+std::string to_literal(const rbtree& tree);
 
 #endif
