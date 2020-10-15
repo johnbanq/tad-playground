@@ -19,3 +19,7 @@ TEST_CASE( "from_literal works on rbtree", "[rbtree][literal]" ) {
     REQUIRE(tree.root->right->value == 3);
     REQUIRE(tree.root->right->color == color::red);
 }
+
+TEST_CASE( "to_literal works on rbtree", "[rbtree][literal]" ) {
+    REQUIRE(to_literal(rbtree_from_literal("(2B:(1R):(3R))")) == "(2B:(1R):(3R))");
+}
