@@ -103,6 +103,11 @@ rbtree::color color_of(const rbtree::node* n) {
     return n == nullptr ? rbtree::color::black : n->color;
 }
 
+char to_char(rbtree::color color) {
+    return color == rbtree::color::black ? 'B' : 'R';
+}
+
+
 void find_red_root_violation(const rbtree& tree, std::vector<std::string>& violations) {
     if(color_of(tree.root)!=rbtree::color::black) {
         violations.push_back("root must not be red");
@@ -128,6 +133,31 @@ void find_red_child_of_red_violation(const rbtree& tree, std::vector<std::string
     find_red_child_of_red_violation_internal(tree.root, violations);
 }
 
+void find_path_black_count_violation_on_node(const rbtree::node* node, std::vector<std::string>& violations) {
+    int expected_black_count = -1;
+    enumerate_node_to_leaf_path(node, [&](const std::vector<const rbtree::node*>& path){
+        int this_black_count = std::count_if(++path.begin(), path.end(), [](auto node){return color_of(node)==rbtree::color::black;});
+        if(expected_black_count == -1) {
+            expected_black_count = this_black_count;
+        } else {
+            if(expected_black_count!=this_black_count) {
+                std::string path_str;
+                for (size_t i = 0; i < path.size(); i++) {
+                    if(i!=0) {
+                        path_str += "->";
+                    }
+                    path_str+= path[i] == nullptr ? std::string{"nullptr"} : "{"+std::to_string(path[i]->value)+to_char(path[i]->color)+"}";
+                }
+                violations.push_back("node{"+std::to_string(node->value)+"}'s path "+path_str+" has a black node count of "+std::to_string(this_black_count)+", should be "+std::to_string(expected_black_count));
+            }
+        }
+    });
+}
+
+void find_path_black_count_violation(const rbtree& tree, std::vector<std::string>& violations) {
+    enumerate_node_preorder(tree.root, [&](const rbtree::node* node){find_path_black_count_violation_on_node(node, violations);});
+}
+
 std::vector<std::string> find_violation(const rbtree& tree) {
     auto violations = std::vector<std::string>{};
     find_pointer_violation(tree, violations);
@@ -135,7 +165,10 @@ std::vector<std::string> find_violation(const rbtree& tree) {
     if(violations.size() == 0) {
         find_red_root_violation(tree, violations);
         find_red_child_of_red_violation(tree, violations);
+        find_path_black_count_violation(tree, violations);
     }
     return violations;
 }
+
+
 

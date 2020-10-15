@@ -1,4 +1,5 @@
 #include <vector>
+#include <set>
 
 #include "catch.hpp"
 
@@ -68,6 +69,45 @@ TEST_CASE( "find_violation rejects red root", "[rbtree][verify]" ) {
 }
 
 TEST_CASE( "find_violation rejects red child of red node", "[rbtree][verify]" ) {
-    auto tree = rbtree_from_literal("(4B:(2R:(1R):(3B)):(6B:(5B):(7B)))");
-    REQUIRE(find_violation(tree) == std::vector<std::string>{"red node {2}'s child {1} cannot be a red node!"});
+    auto tree = rbtree_from_literal("(4B:(2R:(1R):(3R)):null)");
+    REQUIRE(find_violation(tree) == std::vector<std::string>{"red node {2}'s child {1} cannot be a red node!", "red node {2}'s child {3} cannot be a red node!"});
+}
+
+
+TEST_CASE( "enumerate_node_to_leaf_path enumerate all path from node to leaf", "[rbtree][verify]" ) {
+    auto tree = rbtree_from_literal("(4B:(2B:(1B):(3B)):(5B))");
+    std::vector<std::vector<const rbtree::node*>> expected_paths {
+        //left nullptr and right nullptr are not considered as same, hence double
+        std::vector<const rbtree::node*>{tree.root, tree.root->left, tree.root->left->left, nullptr},
+        std::vector<const rbtree::node*>{tree.root, tree.root->left, tree.root->left->left, nullptr},
+        std::vector<const rbtree::node*>{tree.root, tree.root->left, tree.root->left->right, nullptr},
+        std::vector<const rbtree::node*>{tree.root, tree.root->left, tree.root->left->right, nullptr},
+        std::vector<const rbtree::node*>{tree.root, tree.root->right, nullptr},
+        std::vector<const rbtree::node*>{tree.root, tree.root->right, nullptr}
+    };
+    std::vector<std::vector<const rbtree::node*>> actual_paths;
+
+    enumerate_node_to_leaf_path(tree.root, [&](const std::vector<const rbtree::node*>& path){actual_paths.push_back(path);});
+
+    REQUIRE(actual_paths == expected_paths);
+}
+
+TEST_CASE( "enumerate_preorder enumerate node correctly", "[rbtree][verify]" ) {
+    auto tree = rbtree_from_literal("(4B:(2B:(1B):(3B)):(5B))");
+    std::vector<const rbtree::node*> expected_nodes{
+        tree.root, tree.root->left, tree.root->left->left, tree.root->left->right, tree.root->right
+    };
+    std::vector<const rbtree::node*> actual_nodes;
+
+    enumerate_node_preorder(tree.root, [&](const rbtree::node* node){actual_nodes.push_back(node);});
+
+    REQUIRE(actual_nodes == expected_nodes);
+}
+
+TEST_CASE( "find_violation rejects unequal black node count", "[rbtree][verify]" ) {
+    auto tree = rbtree_from_literal("(4B:null:(6B))");
+    REQUIRE(find_violation(tree) == std::vector<std::string>{
+        "node{4}'s path {4B}->{6B}->nullptr has a black node count of 2, should be 1",
+        "node{4}'s path {4B}->{6B}->nullptr has a black node count of 2, should be 1"
+    });
 }
