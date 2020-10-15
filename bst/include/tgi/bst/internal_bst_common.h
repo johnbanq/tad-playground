@@ -35,10 +35,10 @@ struct literal_parser {
             consume('(');
             auto value = parse_value();
             if(try_consume(')')) {
-                auto result = build_node(value, parent);
+                auto result = build_node(value);
                 return set_child(result, nullptr, nullptr);
             } else {
-                auto result = build_node(std::move(value), parent);
+                auto result = build_node(std::move(value));
                 consume(':');
                 auto left = parse(result);
                 consume(':');
@@ -52,7 +52,7 @@ struct literal_parser {
 
     virtual value_type parse_value() = 0;
 
-    virtual node_type* build_node(value_type value, node_type* parent) = 0;
+    virtual node_type* build_node(value_type value) = 0;
 
     virtual node_type* set_child(node_type* node, node_type* left, node_type* right) = 0;
 

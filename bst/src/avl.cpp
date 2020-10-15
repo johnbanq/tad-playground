@@ -49,13 +49,19 @@ struct avl_literal_parser: public literal_parser<avl::node, int> {
         return parse_int();
     }
 
-    avl::node* build_node(int value, avl::node* parent) override {
-        return new avl::node{value, 0, parent, nullptr, nullptr};
+    avl::node* build_node(int value) override {
+        return new avl::node{value, 0, nullptr, nullptr, nullptr};
     }
 
     avl::node* set_child(avl::node* node, avl::node* left, avl::node* right) override {
         node->left = left;
+        if(left!=nullptr) {
+            left->parent = node;
+        }
         node->right = right;
+        if(right!=nullptr) {
+            right->parent = node;
+        }
         node->height = compute_height(node);
         return node;
     }

@@ -43,13 +43,19 @@ struct rbtree_literal_parser: public literal_parser<rbtree::node, std::pair<int,
         return std::make_pair(i, color);
     }
 
-    rbtree::node* build_node(std::pair<int, rbtree::color> value, rbtree::node* parent) override {
-        return new rbtree::node{value.first, value.second, parent, nullptr, nullptr};
+    rbtree::node* build_node(std::pair<int, rbtree::color> value) override {
+        return new rbtree::node{value.first, value.second, nullptr, nullptr, nullptr};
     }
 
     rbtree::node* set_child(rbtree::node* node, rbtree::node* left, rbtree::node* right) override {
         node->left = left;
+        if(left!=nullptr) {
+            left->parent = node;
+        }
         node->right = right;
+        if(right!=nullptr) {
+            right->parent = node;
+        }
         return node;
     }
 
