@@ -93,30 +93,30 @@ TEST_CASE("search works on sample avl", "[avl][search]" ) {
 
 // rotate and rabalancing
 
-TEST_CASE("left_rotate works", "[avl][rotate]" ) {
+TEST_CASE("avl_left_rotate works", "[avl][rotate]" ) {
     auto tree = avl_from_literal("(4:(2:null:(3)):(5))");
-    left_rotate(tree.root->left);
+    avl_left_rotate(tree.root->left);
     REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(4:(3:(2):null):(5))");
 }
 
-TEST_CASE("left_rotate works on root", "[avl][rotate]" ) {
+TEST_CASE("avl_left_rotate works on root", "[avl][rotate]" ) {
     auto tree = avl_from_literal("(2:null:(3))");
-    left_rotate(tree.root);
+    avl_left_rotate(tree.root);
     REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(3:(2):null)");
 }
 
-TEST_CASE("right_rotate works", "[avl][rotate]" ) {
+TEST_CASE("avl_right_rotate works", "[avl][rotate]" ) {
     auto tree = avl_from_literal("(4:(2:(1):null):(5))");
-    right_rotate(tree.root->left);
+    avl_right_rotate(tree.root->left);
     REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(4:(1:null:(2)):(5))");
 }
 
-TEST_CASE("right_rotate works on root", "[avl][rotate]" ) {
+TEST_CASE("avl_right_rotate works on root", "[avl][rotate]" ) {
     auto tree = avl_from_literal("(2:(1):null)");
-    right_rotate(tree.root);
+    avl_right_rotate(tree.root);
     REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(1:null:(2))");
 }

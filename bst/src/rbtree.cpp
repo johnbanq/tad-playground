@@ -180,4 +180,82 @@ void rbtree_right_rotate(rbtree::node*& n) {
 }
 
 
+rbtree::node* perform_insert_fixup(rbtree& tree, rbtree::node* to_fix) {
+    if(to_fix->parent == nullptr) { // root case
+        to_fix->color = rbtree::color::black;
+        return nullptr;
+    } else {
+        //you got a black parent, no-op
+        //note: this also mean you will have a red parent to continue
+        //note: and since there is no violation before the insert, you cannot be root, hence your grandparent exists
+        if(color_of(to_fix->parent) == rbtree::color::black) {
+            return nullptr;
+        } else {
+            auto parent = to_fix->parent;
+            auto grandparent = to_fix->parent->parent;
+            if(grandparent->left == parent) {
+                //left case
+                auto uncle = grandparent->right;
+                if(color_of(uncle)==rbtree::color::red) {
+                    // case 1
+                    grandparent->color = rbtree::color::red;
+                    parent->color = rbtree::color::black;
+                    uncle->color = rbtree::color::black;
+                    return grandparent;
+                } else {
+                    if(to_fix != parent->left && to_fix != parent->right) {
+                        throw std::logic_error{
+                            "how come to_fix {"+addr_string(to_fix)+"} is not left and right child of parent{"+addr_string(parent)+"}?"
+                        };
+                    }
+                    // case 3
+                    if(to_fix == parent->right) {
+                        rbtree_left_rotate(*ref_of(tree, parent));
+                        //rotate put parent under to_fix, we swap their location for ease of code below
+                        std::swap(parent, to_fix);
+                    }
+                    //case 2
+                    rbtree_right_rotate(*ref_of(tree, grandparent));
+                    grandparent->color = rbtree::color::red;
+                    parent->color = rbtree::color::black;
+                    return nullptr;
+                }
+            } else {
+                //right case
+                auto uncle = grandparent->left;
+                if(color_of(uncle)==rbtree::color::red) {
+                    // case 1
+                    grandparent->color = rbtree::color::red;
+                    parent->color = rbtree::color::black;
+                    uncle->color = rbtree::color::black;
+                    return grandparent;
+                } else {
+                    // case 3
+                    if(to_fix == parent->left) {
+                        rbtree_right_rotate(*ref_of(tree, parent));
+                        //rotate put parent under to_fix, we swap their location for ease of code below
+                        std::swap(parent, to_fix);
+                    }
+                    //case 2
+                    rbtree_left_rotate(*ref_of(tree, grandparent));
+                    grandparent->color = rbtree::color::red;
+                    parent->color = rbtree::color::black;
+                    return nullptr;
+                }
+            }
+        }
+    }
+    return nullptr;
+}
+
+void insert(rbtree& tree, int value) {
+    auto [parent, ref] = locate_parent_and_expected_ref(tree, value);
+    if(*ref == nullptr) {
+        *ref = new node {value, rbtree::color::red, parent, nullptr, nullptr};
+        auto fixing = *ref;
+        while(fixing != nullptr) {
+            fixing = perform_insert_fixup(tree, fixing);
+        }
+    }
+}
 

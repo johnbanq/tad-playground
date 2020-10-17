@@ -114,7 +114,7 @@ TEST_CASE( "find_violation rejects unequal black node count", "[rbtree][verify]"
     });
 }
 
-// rotate and rabalancing
+// rotate and rabalancing //
 
 TEST_CASE("left_rotate works", "[rbtree][rotate]" ) {
     auto tree = rbtree_from_literal("(2B:(1B):(3B))");
@@ -128,4 +128,92 @@ TEST_CASE("right_rotate works", "[rbtree][rotate]" ) {
     REQUIRE(to_literal(tree) == "(1B:null:(2B:null:(3B)))");
 }
 
+// insert //
 
+TEST_CASE("perform_insert_fixup is no-op on black parent", "[rbtree][insert]" ) {
+    auto tree = rbtree_from_literal("(2B:(1R):null)");
+    REQUIRE(perform_insert_fixup(tree, tree.root->left) == nullptr);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(2B:(1R):null)");
+}
+
+TEST_CASE("perform_insert_fixup handles root fixup", "[rbtree][insert]" ) {
+    auto tree = rbtree_from_literal("(2R)");
+    REQUIRE(perform_insert_fixup(tree, tree.root) == nullptr);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(2B)");
+}
+
+TEST_CASE("perform_insert_fixup handles left case 1", "[rbtree][insert]" ) {
+    auto tree = rbtree_from_literal("(6B:(4R:(3R):null):(7R))");
+    REQUIRE(perform_insert_fixup(tree, tree.root->left->left) == tree.root);
+    REQUIRE(find_violation(tree) == std::vector<std::string>{"root must not be red"});
+    REQUIRE(to_literal(tree) == "(6R:(4B:(3R):null):(7B))");
+
+    tree = rbtree_from_literal("(6B:(4R:null:(5R)):(7R))");
+    REQUIRE(perform_insert_fixup(tree, tree.root->left->right) == tree.root);
+    REQUIRE(find_violation(tree) == std::vector<std::string>{"root must not be red"});
+    REQUIRE(to_literal(tree) == "(6R:(4B:null:(5R)):(7B))");
+}
+
+TEST_CASE("perform_insert_fixup handles left case 3", "[rbtree][insert]" ) {
+    auto tree = rbtree_from_literal("(6B:(4R:(3R):null):null)");
+    REQUIRE(perform_insert_fixup(tree, tree.root->left->left) == nullptr);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(4B:(3R):(6R))");
+}
+
+TEST_CASE("perform_insert_fixup handles left case 2", "[rbtree][insert]" ) {
+    auto tree = rbtree_from_literal("(6B:(4R:null:(5R)):null)");
+    REQUIRE(perform_insert_fixup(tree, tree.root->left->right) == nullptr);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(5B:(4R):(6R))");
+}
+
+TEST_CASE("perform_insert_fixup handles right case 1", "[rbtree][insert]" ) {
+    auto tree = rbtree_from_literal("(6B:(3R):(8R:(7R):null))");
+    REQUIRE(perform_insert_fixup(tree, tree.root->right->left) == tree.root);
+    REQUIRE(find_violation(tree) == std::vector<std::string>{"root must not be red"});
+    REQUIRE(to_literal(tree) == "(6R:(3B):(8B:(7R):null))");
+
+    tree = rbtree_from_literal("(6B:(3R):(8R:null:(10R)))");
+    REQUIRE(perform_insert_fixup(tree, tree.root->right->right) == tree.root);
+    REQUIRE(find_violation(tree) == std::vector<std::string>{"root must not be red"});
+    REQUIRE(to_literal(tree) == "(6R:(3B):(8B:null:(10R)))");
+}
+
+TEST_CASE("perform_insert_fixup handles right case 2", "[rbtree][insert]" ) {
+    auto tree = rbtree_from_literal("(6B:null:(10R:(9R):null))");
+    REQUIRE(perform_insert_fixup(tree, tree.root->right->left) == nullptr);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(9B:(6R):(10R))");
+}
+
+TEST_CASE("perform_insert_fixup handles right case 3", "[rbtree][insert]" ) {
+    auto tree = rbtree_from_literal("(6B:null:(7R:null:(8R)))");
+    REQUIRE(perform_insert_fixup(tree, tree.root->right->right) == nullptr);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(7B:(6R):(8R))");
+}
+
+TEST_CASE("rbtree insert works", "[rbtree][insert]" ) {
+    auto tree = rbtree_from_literal("null");
+    insert(tree, 2);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(2B)");
+
+    insert(tree, 1);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(2B:(1R):null)");
+
+    insert(tree, 3);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(2B:(1R):(3R))");
+}
+
+TEST_CASE("rbtree insert performs fix up to the tree", "[rbtree][insert]" ) {
+    auto tree = rbtree_from_literal("(6B:(3R):(8R))");
+    insert(tree, 7);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(6B:(3B):(8B:(7R):null))");
+}

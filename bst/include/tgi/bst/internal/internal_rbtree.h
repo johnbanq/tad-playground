@@ -49,8 +49,18 @@ void enumerate_node_preorder(const rbtree::node* node, lambda lam) {
     enumerate_node_preorder_internal(node, lam);
 }
 
+
 void rbtree_left_rotate(rbtree::node*& node);
 
 void rbtree_right_rotate(rbtree::node*& node);
+
+
+/**
+ * \brief perform 1 round of insert fix up, 
+ *     we assume to_fix is a red node that might have broken the rules caused by insert of previous execution of the fixup
+ *     we fix it here and return the next node you might need to fix, nullptr if all done
+ */
+rbtree::node* perform_insert_fixup(rbtree& tree, rbtree::node* to_fix);
+
 
 #endif

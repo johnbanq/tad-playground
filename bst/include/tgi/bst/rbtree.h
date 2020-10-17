@@ -74,4 +74,12 @@ std::string to_graphviz(const rbtree& tree);
  */
 std::vector<std::string> find_violation(const rbtree& tree);
 
+/**
+ * \brief insert an element into the tree
+ * 
+ * \param tree the tree
+ * \param value the value to insert
+ */
+void insert(rbtree& tree, int value);
+
 #endif

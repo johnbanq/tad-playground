@@ -52,6 +52,27 @@ std::pair<node_ptr_type_of<tree_type>, node_ptr_type_of<tree_type>*> locate_pare
     return locate_parent_and_expected_ref((node_ptr_type_of<tree_type>)nullptr, &(tree.root), value);
 } 
 
+template<typename tree_type, typename node_type>
+node_type** ref_of(tree_type& tree, node_type* node) {
+    if(node->parent == nullptr) {
+        if(tree.root == node) {
+            return &tree.root;
+        } else {
+            //impossible
+            throw std::logic_error("invalid node: {"+std::to_string(node->value)+"} is not root and has no parent!");
+        }
+    } else {
+        if(node->parent->left == node) {
+            return &(node->parent->left);
+        } else if(node->parent->right == node) {
+            return &(node->parent->right);
+        } else {
+            //impossible
+            throw std::logic_error("invalid node: {"+std::to_string(node->value)+"} has a parent {"+std::to_string(node->parent->value)+"} but is not any of its child!");
+        }
+    }
+}
+
 
 // left & right rotate //
 
