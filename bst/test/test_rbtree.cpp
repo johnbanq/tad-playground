@@ -9,6 +9,7 @@
 
 using color = rbtree::color;
 
+
 TEST_CASE( "from_literal works on rbtree", "[rbtree][literal]" ) {
     auto tree = rbtree_from_literal("(2B:(1R):(3R))");
     REQUIRE(tree.root->value == 2);
@@ -47,6 +48,7 @@ TEST_CASE( "to_graphviz works on rbtree", "[rbtree][visualize]" ) {
     );
 }
 
+
 TEST_CASE( "find_violation for avl is also validate bst constraints", "[rbtree][verify]" ) {
     auto tree = rbtree_from_literal("(4B:(2B:(1B):(3B)):(6B:(5B):(7B)))");
     auto root = tree.root->left;
@@ -57,7 +59,7 @@ TEST_CASE( "find_violation for avl is also validate bst constraints", "[rbtree][
     REQUIRE(find_violation(tree) == std::vector<std::string>{"{1} is in wrong place: it should must be in range (2,int_max]"});
 }
 
-TEST_CASE( "find_violation will only check avl constraint if have no bst violations", "[rbtree][verify]" ) {
+TEST_CASE( "find_violation will only check rbtree constraint if have no bst violations", "[rbtree][verify]" ) {
     auto tree = rbtree_from_literal("(2R:(1B):(3B))");
     tree.root->left->parent = tree.root->right;
     REQUIRE(find_violation(tree).size() == 1);
