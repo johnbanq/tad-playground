@@ -113,3 +113,19 @@ TEST_CASE( "find_violation rejects unequal black node count", "[rbtree][verify]"
         "node{4}'s path {4B}->{6B}->nullptr has a black node count of 2, should be 1"
     });
 }
+
+// rotate and rabalancing
+
+TEST_CASE("left_rotate works", "[rbtree][rotate]" ) {
+    auto tree = rbtree_from_literal("(2B:(1B):(3B))");
+    rbtree_left_rotate(tree.root);
+    REQUIRE(to_literal(tree) == "(3B:(2B:(1B):null):null)");
+}
+
+TEST_CASE("right_rotate works", "[rbtree][rotate]" ) {
+    auto tree = rbtree_from_literal("(2B:(1B):(3B))");
+    rbtree_right_rotate(tree.root);
+    REQUIRE(to_literal(tree) == "(1B:null:(2B:null:(3B)))");
+}
+
+

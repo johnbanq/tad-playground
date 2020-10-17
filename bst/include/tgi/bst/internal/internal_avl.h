@@ -11,9 +11,9 @@ static std::string avl_node_stmt(const avl::node* n) {
     return std::to_string(n->value)+"[label=\""+std::to_string(n->value)+"(h:"+std::to_string(n->height)+")"+"(a:"+addr_string(n)+")\"];";
 }
 
-void left_rotate(avl::node*& n);
+void avl_left_rotate(avl::node*& n);
 
-void right_rotate(avl::node*& n);
+void avl_right_rotate(avl::node*& n);
 
 void rebalance(avl::node*& n);
 

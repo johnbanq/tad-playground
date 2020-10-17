@@ -151,46 +151,18 @@ bool search(avl& tree, int value) {
 }
 
 
-void left_rotate(avl::node*& n) {
+void avl_left_rotate(avl::node*& n) {
     auto node = n;
-    auto left = node->left;
     auto right = node->right;
-    auto rightleft = right->left;
-    auto rightright = right->right;
-
-    n = right;
-    right->parent = node->parent;
-
-    node->right = rightleft;
-    if(rightleft != nullptr) {
-        rightleft->parent = node;
-    }
-
-    right->left = node;
-    node->parent = right;
-
+    left_rotate(n);
     node->height = compute_height(node);
     right->height = compute_height(right);
 }
 
-void right_rotate(avl::node*& n) {
+void avl_right_rotate(avl::node*& n) {
     auto node = n;
     auto left = node->left;
-    auto right = node->right;
-    auto leftleft = left->left;
-    auto leftright = left->right;
-
-    n = left;
-    left->parent = node->parent;
-    
-    node->left = leftright;
-    if(leftright != nullptr) {
-        leftright->parent = node;
-    }
-
-    left->right = node;
-    node->parent = left;
-
+    right_rotate(n);
     node->height = compute_height(node);
     left->height = compute_height(left);
 }
@@ -202,12 +174,12 @@ void rebalance(avl::node*& n) {
     } else if(factor == 2) {
         int left_factor = balance_factor_of(n->left);
         if(left_factor == 1) { // left-left case
-            right_rotate(n);
+            avl_right_rotate(n);
         } else if(left_factor == -1) { // left-right case
-            left_rotate(n->left);
-            right_rotate(n);
+            avl_left_rotate(n->left);
+            avl_right_rotate(n);
         } else if(left_factor == 0) { // tie, whatever you wish
-            right_rotate(n);
+            avl_right_rotate(n);
         } else {
             //impossible
             throw std::logic_error("unexpected left balance factor on {"+std::to_string(n->left->value)+"}: "+std::to_string(left_factor)); 
@@ -215,12 +187,12 @@ void rebalance(avl::node*& n) {
     } else if(factor == -2) {
         int right_factor = balance_factor_of(n->right);
         if(right_factor == -1) { // right-right case
-            left_rotate(n);
+            avl_left_rotate(n);
         } else if(right_factor == 1) { // right-left case
-            right_rotate(n->right);
-            left_rotate(n);
+            avl_right_rotate(n->right);
+            avl_left_rotate(n);
         } else if(right_factor == 0) { // tie, whatever you wish
-            left_rotate(n);
+            avl_left_rotate(n);
         } else {
             //impossible
             throw std::logic_error("unexpected right balance factor on {"+std::to_string(n->right->value)+"}: "+std::to_string(right_factor)); 

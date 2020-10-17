@@ -49,4 +49,8 @@ void enumerate_node_preorder(const rbtree::node* node, lambda lam) {
     enumerate_node_preorder_internal(node, lam);
 }
 
+void rbtree_left_rotate(rbtree::node*& node);
+
+void rbtree_right_rotate(rbtree::node*& node);
+
 #endif

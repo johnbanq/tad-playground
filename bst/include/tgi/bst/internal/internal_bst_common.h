@@ -53,4 +53,46 @@ std::pair<node_ptr_type_of<tree_type>, node_ptr_type_of<tree_type>*> locate_pare
 } 
 
 
+// left & right rotate //
+
+template<typename node_type>
+void left_rotate(node_type*& n) {
+    auto node = n;
+    auto left = node->left;
+    auto right = node->right;
+    auto rightleft = right->left;
+    auto rightright = right->right;
+
+    n = right;
+    right->parent = node->parent;
+
+    node->right = rightleft;
+    if(rightleft != nullptr) {
+        rightleft->parent = node;
+    }
+
+    right->left = node;
+    node->parent = right;
+}
+
+template<typename node_type>
+void right_rotate(node_type*& n) {
+    auto node = n;
+    auto left = node->left;
+    auto right = node->right;
+    auto leftleft = left->left;
+    auto leftright = left->right;
+
+    n = left;
+    left->parent = node->parent;
+    
+    node->left = leftright;
+    if(leftright != nullptr) {
+        leftright->parent = node;
+    }
+
+    left->right = node;
+    node->parent = left;
+}
+
 #endif

@@ -171,4 +171,13 @@ std::vector<std::string> find_violation(const rbtree& tree) {
 }
 
 
+void rbtree_left_rotate(rbtree::node*& n) {
+    left_rotate(n);
+}
+
+void rbtree_right_rotate(rbtree::node*& n) {
+    right_rotate(n);
+}
+
+
 
