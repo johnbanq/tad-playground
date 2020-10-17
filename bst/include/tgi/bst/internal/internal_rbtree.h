@@ -62,5 +62,12 @@ void rbtree_right_rotate(rbtree::node*& node);
  */
 rbtree::node* perform_insert_fixup(rbtree& tree, rbtree::node* to_fix);
 
+/**
+ * \brief perform 1 round of delete fix up, 
+ *     we assume to_fix is a node having a "floating black" on it caused by removing a black node in deletion or by previous execution of the fixup
+ *     we fix it here and return the next node you might need to fix, nullptr if all done
+ * \note we need the root of parent since to_fix might be nullptr
+ */
+rbtree::node* perform_delete_fixup(rbtree& tree, rbtree::node* parent, rbtree::node* to_fix);
 
 #endif
