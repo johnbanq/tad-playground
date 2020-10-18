@@ -1,4 +1,4 @@
-# Test Guided Implementation Playground
+# Test Assisted Development Playground
 
 The central repository for showing off my journey of implementing various interesting stuff using a TDD-ish dev style
 
