@@ -133,7 +133,7 @@ void check_balance(const node* node, std::vector<std::string>& violations) {
     }
 }
 
-std::vector<std::string> find_violation(const avl& tree) {
+std::vector<std::string> find_violation(const avl& tree, const avl_find_violation_config& config) {
     auto violations = std::vector<std::string>{};
     find_pointer_violation(tree, violations);
     find_value_violation(tree, violations);
@@ -265,26 +265,10 @@ void remove(avl& tree, int value) {
 }
 
 
-unsigned int count_internal(avl::node* root) {
-    if(root != nullptr) {
-        return 1 + count_internal(root->left) + count_internal(root->right); 
-    } else {
-        return 0;
-    }
-}
-
 unsigned int count(avl& tree) {
     return count_internal(tree.root);
 }
 
-
-void list_all_internal(avl::node* root, std::vector<int>& elems) {
-    if(root!=nullptr) {
-        list_all_internal(root->left, elems);
-        elems.push_back(root->value);
-        list_all_internal(root->right, elems);
-    }
-}
 
 std::vector<int> list_all(avl& tree) {
     std::vector<int> elems;

@@ -66,13 +66,17 @@ std::string to_literal(const rbtree& tree);
  */
 std::string to_graphviz(const rbtree& tree);
 
+struct rbtree_find_violation_config {
+    bool fast_path_check = false;
+};
+
 /**
  * \brief check the validity of the rbtree
  * 
  * \param tree the tree to check
  * \return std::vector<std::string> the detected violations, empty if none 
  */
-std::vector<std::string> find_violation(const rbtree& tree);
+std::vector<std::string> find_violation(const rbtree& tree, const rbtree_find_violation_config& config=rbtree_find_violation_config{});
 
 /**
  * \brief insert an element into the tree
@@ -89,5 +93,21 @@ void insert(rbtree& tree, int value);
  * \param value the value to remove
  */
 void remove(rbtree& tree, int value);
+
+/**
+ * \brief count the amount of element in tree
+ * 
+ * \param tree the tree
+ * \return unsigned int element amount
+ */
+unsigned int count(rbtree& tree);
+
+/**
+ * \brief list all elements in sorted order
+ * 
+ * \param tree the tree
+ * \return std::vector<int> the elements 
+ */
+std::vector<int> list_all(rbtree& tree);
 
 #endif

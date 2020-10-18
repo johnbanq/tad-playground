@@ -61,13 +61,18 @@ std::string to_literal(const avl& tree);
  */
 std::string to_graphviz(const avl& tree);
 
+struct avl_find_violation_config {
+
+};
+
 /**
  * \brief check the validity of the avl
  * 
  * \param tree the tree to check
+ * \param config the configuration of the checking process
  * \return std::vector<std::string> the detected violations, empty if none 
  */
-std::vector<std::string> find_violation(const avl& tree);
+std::vector<std::string> find_violation(const avl& tree, const avl_find_violation_config& config = avl_find_violation_config{});
 
 /**
  * \brief insert an element into the tree

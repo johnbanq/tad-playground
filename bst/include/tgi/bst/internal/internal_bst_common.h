@@ -23,6 +23,28 @@ void delete_tree(node_type* n) {
     }
 }
 
+// count element //
+
+template<typename node_type>
+unsigned int count_internal(node_type* root) {
+    if(root != nullptr) {
+        return 1 + count_internal(root->left) + count_internal(root->right); 
+    } else {
+        return 0;
+    }
+}
+
+// list_all element //
+
+template<typename node_type>
+void list_all_internal(node_type* root, std::vector<int>& elems) {
+    if(root!=nullptr) {
+        list_all_internal(root->left, elems);
+        elems.push_back(root->value);
+        list_all_internal(root->right, elems);
+    }
+}
+
 // parent and ref locator //
 
 template<typename node_type>

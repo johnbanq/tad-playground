@@ -114,6 +114,15 @@ TEST_CASE( "find_violation rejects unequal black node count", "[rbtree][verify]"
     });
 }
 
+TEST_CASE( "find_violation with fast_black_height rejects unequal black node with less debug data", "[rbtree][verify]" ) {
+    auto tree = rbtree_from_literal("(4B:null:(6B))");
+    rbtree_find_violation_config config;
+    config.fast_path_check = true;
+    REQUIRE(find_violation(tree, config) == std::vector<std::string>{
+        "node{4} has non-equal black height!"
+    });
+}
+
 // rotate and rabalancing //
 
 TEST_CASE("left_rotate works", "[rbtree][rotate]" ) {
@@ -341,4 +350,14 @@ TEST_CASE( "remove works on 2 child case", "[rbtree][delete]" ) {
     remove(tree, 2);
     REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(3B:(1R):null)");
+}
+
+TEST_CASE( "count works", "[rbtree][count]" ) {
+    auto tree = rbtree_from_literal("(2B:(1B):(3B))");
+    REQUIRE(count(tree)==3);
+}
+
+TEST_CASE( "list_all works", "[rbtree][list_all]" ) {
+    auto tree = rbtree_from_literal("(2B:(1B):(3B))");
+    REQUIRE(list_all(tree)==std::vector<int>{1,2,3});
 }

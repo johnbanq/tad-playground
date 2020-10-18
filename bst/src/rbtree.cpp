@@ -158,14 +158,44 @@ void find_path_black_count_violation(const rbtree& tree, std::vector<std::string
     enumerate_node_preorder(tree.root, [&](const rbtree::node* node){find_path_black_count_violation_on_node(node, violations);});
 }
 
-std::vector<std::string> find_violation(const rbtree& tree) {
+int find_path_black_count_violation_fast_internal(const rbtree::node* node, std::vector<std::string>& violations) {
+    if(node!=nullptr) {
+        int left_height = find_path_black_count_violation_fast_internal(node->left, violations);
+        int right_height = find_path_black_count_violation_fast_internal(node->right, violations);
+        if(left_height == -1 || right_height == -1) {
+            //we cannot figure out is this node correct if it's child is screwed
+            return -1;
+        }
+        if(left_height != right_height) {
+            //we are screwed
+            violations.push_back("node{"+std::to_string(node->value)+"} has non-equal black height!");
+            return -1;   
+        } else {
+            //return black node count on this path
+            return left_height + (color_of(node) == rbtree::color::black ? 1 : 0);
+        }
+    } else {
+        //nullptrs are the black leaf
+        return 1;
+    }
+}
+
+void find_path_black_count_violation_fast(const rbtree& tree, std::vector<std::string>& violations) {
+    find_path_black_count_violation_fast_internal(tree.root, violations);
+}
+
+std::vector<std::string> find_violation(const rbtree& tree, const rbtree_find_violation_config& config) {
     auto violations = std::vector<std::string>{};
     find_pointer_violation(tree, violations);
     find_value_violation(tree, violations);
     if(violations.size() == 0) {
         find_red_root_violation(tree, violations);
         find_red_child_of_red_violation(tree, violations);
-        find_path_black_count_violation(tree, violations);
+        if(config.fast_path_check) {
+            find_path_black_count_violation_fast(tree, violations);
+        } else {
+            find_path_black_count_violation(tree, violations);
+        }
     }
     return violations;
 }
@@ -386,8 +416,8 @@ void perform_deletion(rbtree& tree, rbtree::node* parent, rbtree::node*& ref) {
         rbtree::node* victim = node->right;
         rbtree::node* victim_parent = node; 
         while(victim->left!=nullptr) {
+            victim_parent = victim;
             victim = victim->left;
-            victim_parent = victim_parent->left;
         }
 
         int victim_value = victim->value;
@@ -426,4 +456,16 @@ void remove(rbtree& tree, int value) {
     if(*ref != nullptr) {
         perform_deletion(tree, parent, *ref);
     }
+}
+
+
+unsigned int count(rbtree& tree) {
+    return count_internal(tree.root);
+}
+
+
+std::vector<int> list_all(rbtree& tree) {
+    std::vector<int> elems;
+    list_all_internal(tree.root, elems);
+    return elems;
 }
