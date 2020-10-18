@@ -259,7 +259,7 @@ void insert(rbtree& tree, int value) {
     }
 }
 
-#include<iostream>
+
 rbtree::node* perform_delete_fixup(rbtree& tree, rbtree::node* parent, rbtree::node* to_fix) {
     using color = rbtree::color;
     if(tree.root == to_fix) {
@@ -285,7 +285,7 @@ rbtree::node* perform_delete_fixup(rbtree& tree, rbtree::node* parent, rbtree::n
             parent = to_fix->parent;
             sibling = parent->right;
         }
-        // ensure color_of(sibling) == color::black
+        // case 1 is now case 2, 3 or 4
         if(color_of(sibling->left) == color::black && color_of(sibling->right) == color::black) {
             //case 2
             //absorb color from both to_fix and sibling, push to parent
@@ -299,7 +299,7 @@ rbtree::node* perform_delete_fixup(rbtree& tree, rbtree::node* parent, rbtree::n
                 sibling = sibling->parent;
                 std::swap(sibling->color, sibling->right->color);
             }
-            //ensure color_of(sibling->right) == color::red
+            //case 3 converted to case 4
             //case 4
             rbtree_left_rotate(*ref_of(tree, parent));
             sibling->color = parent->color;
@@ -311,14 +311,33 @@ rbtree::node* perform_delete_fixup(rbtree& tree, rbtree::node* parent, rbtree::n
         //right case
         //ditto to left case
         auto sibling = parent->left;
-        // ensure color_of(sibling) == color::black
+        if(color_of(sibling) == color::red) {
+            //case 1
+            rbtree_right_rotate(*ref_of(tree, parent));
+            to_fix->parent->parent->color = color::black;
+            to_fix->parent->color = color::red;
+            parent = to_fix->parent;
+            sibling = parent->left;
+        }
         if(color_of(sibling->left) == color::black && color_of(sibling->right) == color::black) {
             //case 2
-            //absorb color from both to_fix and sibling, push to parent
             sibling->color = color::red;
             return parent;
         } else {
-            throw "wtf";
+            // case 3 or case 4
+            if(color_of(sibling->left) == color::black) {
+                //case 3
+                rbtree_left_rotate(*ref_of(tree, sibling));
+                sibling = sibling->parent;
+                std::swap(sibling->color, sibling->left->color);
+            }
+            //case 3 converted to case 4
+            //case 4
+            rbtree_right_rotate(*ref_of(tree, parent));
+            sibling->color = parent->color;
+            sibling->left->color = color::black;
+            parent->color = color::black;
+            return nullptr;
         }
     }
 }

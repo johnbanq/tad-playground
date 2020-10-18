@@ -272,10 +272,40 @@ TEST_CASE("perform_delete_fixup handles handles left case 4", "[rbtree][delete]"
     REQUIRE(to_literal(tree) == "(7R:(5B:(3B):(6B)):(11B:(8B):(12B)))");
 }
 
+#define PRINT_LITERAL(str) REQUIRE(to_graphviz(rbtree_from_literal(str)) == "")
+
+#define PRINT_TREE(tree) REQUIRE(to_graphviz(tree) == "")
+
+TEST_CASE("perform_delete_fixup handles handles right case 1", "[rbtree][delete]" ) {
+    //null count as a black leaf, and we assume we removed (7B) from the tree, causing the duo black on the root->left "node"
+    auto tree = rbtree_from_literal("(10B:(5R:(3B:(2B):(4B)):(7B:(6B):(8B))):(12B))");
+    REQUIRE(perform_delete_fixup(tree, tree.root, tree.root->right) == tree.root->right);
+    REQUIRE(to_literal(tree) == "(5B:(3B:(2B):(4B)):(10R:(7R:(6B):(8B)):(12B)))");
+    //this is just to make the tree valid, 10 is a red node, will just terminate
+    REQUIRE(perform_delete_fixup(tree, tree.root, tree.root->right) == nullptr);
+    REQUIRE(is_valid_tree(tree));
+}
+
 TEST_CASE("perform_delete_fixup handles handles right case 2", "[rbtree][delete]" ) {
     //null count as a black leaf, and we assume we removed (7B) from the tree, causing the duo black on the root->left "node"
     auto tree = rbtree_from_literal("(6B:(5B):null)");
     REQUIRE(perform_delete_fixup(tree, tree.root, tree.root->right) == tree.root);
     REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(6B:(5R):null)");
+}
+
+TEST_CASE("perform_delete_fixup handles handles right case 3", "[rbtree][delete]" ) {
+    //note: this example is synthetic, does not represent a real possibility
+    auto tree = rbtree_from_literal("(15R:(10B:(7B):(13R:(11B):(14B))):(17B))");
+    REQUIRE(perform_delete_fixup(tree, tree.root, tree.root->right) == nullptr);
+    REQUIRE(find_violation(tree) == std::vector<std::string>{"root must not be red"});
+    REQUIRE(to_literal(tree) == "(13R:(10B:(7B):(11B)):(15B:(14B):(17B)))");
+}
+
+TEST_CASE("perform_delete_fixup handles handles right case 4", "[rbtree][delete]" ) {
+    //note: this example is synthetic, does not represent a real possibility
+    auto tree = rbtree_from_literal("(10R:(5B:(3R:(2B):(4B)):(7B)):(12B))");
+    REQUIRE(perform_delete_fixup(tree, tree.root, tree.root->right) == nullptr);
+    REQUIRE(find_violation(tree) == std::vector<std::string>{"root must not be red"});
+    REQUIRE(to_literal(tree) == "(5R:(3B:(2B):(4B)):(10B:(7B):(12B)))");
 }
