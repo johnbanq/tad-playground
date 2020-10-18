@@ -67,9 +67,7 @@ rbtree::node* perform_insert_fixup(rbtree& tree, rbtree::node* to_fix);
  *     we assume to_fix is a node having a "floating black" on it caused by removing a black node in deletion or by previous execution of the fixup
  *     we fix it here and return the next node you might need to fix, nullptr if all done
  * \note we need parent explicitly since to_fix might be nullptr
- * \note we need the ref to to_fix instead of to_fix because to_fix might be nullptr, 
- *     and we can use ref to figure out is it left/right child of parent, which is impossible if both child of parent is nullptr
  */
-rbtree::node* perform_delete_fixup(rbtree& tree, rbtree::node* parent, rbtree::node** to_fix_ref);
+rbtree::node* perform_delete_fixup(rbtree& tree, rbtree::node* parent, rbtree::node* to_fix);
 
 #endif

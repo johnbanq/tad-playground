@@ -260,9 +260,8 @@ void insert(rbtree& tree, int value) {
 }
 
 
-rbtree::node* perform_delete_fixup(rbtree& tree, rbtree::node* parent, rbtree::node** to_fix_ref) {
+rbtree::node* perform_delete_fixup(rbtree& tree, rbtree::node* parent, rbtree::node* to_fix) {
     using color = rbtree::color;
-    auto to_fix = *to_fix_ref;
     if(tree.root == to_fix) {
         if(to_fix!=nullptr) {
             //paint it black on red(1st element in tree) or ignore it on already black
@@ -276,7 +275,9 @@ rbtree::node* perform_delete_fixup(rbtree& tree, rbtree::node* parent, rbtree::n
         return nullptr;
     }
     //note: not root, so you have parent
-    if(to_fix_ref == &(parent->left)) {
+    //note: yes, to_fix can be nullptr, but the parent with two nullptr case cannot happen, 
+    //    to_fix carries 2 black, and if it has a nullptr sibling, meaning the parent would have different black node count even before delete 
+    if(to_fix == parent->left) {
         //left case
         //note: we can gurantee sibling is not null, otherwise path parent->sibling(+1) will have smaller black count than parent->to_fix(+2)->(whatsoever subtree)
         auto sibling = parent->right;
@@ -348,14 +349,12 @@ void perform_deletion(rbtree& tree, rbtree::node* parent, rbtree::node*& ref) {
     rbtree::color displaced_color;
     rbtree::node* successor;
     rbtree::node* successor_parent;
-    rbtree::node** successor_ref;
     if(node->left == nullptr && node->right == nullptr) { // 0 child case
 
         displaced = node;
         displaced_color = node->color;
         successor = nullptr;
         successor_parent = parent;
-        successor_ref = &ref;
 
         ref = nullptr;
         delete node;
@@ -366,7 +365,6 @@ void perform_deletion(rbtree& tree, rbtree::node* parent, rbtree::node*& ref) {
         displaced_color = node->color;
         successor = node->left;
         successor_parent = parent;
-        successor_ref = &ref;
 
         ref = node->left;
         ref->parent = parent;
@@ -378,7 +376,6 @@ void perform_deletion(rbtree& tree, rbtree::node* parent, rbtree::node*& ref) {
         displaced_color = node->color;
         successor = node->right;
         successor_parent = parent;
-        successor_ref = &ref;
 
         ref = node->right;
         ref->parent = parent;
@@ -397,8 +394,7 @@ void perform_deletion(rbtree& tree, rbtree::node* parent, rbtree::node*& ref) {
         node->value = victim_value;
 
         auto succ = victim->right;
-        auto succ_ref = ref_of(tree, victim);
-        *succ_ref = succ;
+        *ref_of(tree, victim) = succ;
         if(succ != nullptr) {
             succ->parent = victim->parent;
         }
@@ -407,18 +403,17 @@ void perform_deletion(rbtree& tree, rbtree::node* parent, rbtree::node*& ref) {
         displaced_color = victim->color;
         successor = succ;
         successor_parent = victim_parent;
-        successor_ref = succ_ref;
 
         delete victim;
     }
     if(displaced_color==rbtree::color::black) {
         auto to_fix_parent = successor_parent;
-        auto to_fix_ref = successor_ref;
+        auto to_fix = successor;
         while(true) {
-            auto next = perform_delete_fixup(tree, to_fix_parent, to_fix_ref);
+            auto next = perform_delete_fixup(tree, to_fix_parent, to_fix);
             if(next!=nullptr) {
-                to_fix_ref = ref_of(tree, next);
-                to_fix_parent = (*to_fix_ref)->parent;
+                to_fix = next;
+                to_fix_parent = to_fix->parent;
             } else {
                 break;
             }
