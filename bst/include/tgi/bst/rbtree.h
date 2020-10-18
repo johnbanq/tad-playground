@@ -82,4 +82,12 @@ std::vector<std::string> find_violation(const rbtree& tree);
  */
 void insert(rbtree& tree, int value);
 
+/**
+ * \brief remove a node from the tree
+ * 
+ * \param tree the tree
+ * \param value the value to remove
+ */
+void remove(rbtree& tree, int value);
+
 #endif

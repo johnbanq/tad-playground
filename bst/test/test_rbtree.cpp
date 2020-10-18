@@ -221,19 +221,19 @@ TEST_CASE("rbtree insert performs fix up to the tree", "[rbtree][insert]" ) {
 
 TEST_CASE("perform_delete_fixup handles handles root case", "[rbtree][delete]" ) {
     auto tree = rbtree_from_literal("(6R)");
-    REQUIRE(perform_delete_fixup(tree, nullptr, tree.root) == nullptr);
+    REQUIRE(perform_delete_fixup(tree, nullptr, &(tree.root)) == nullptr);
     REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(6B)");
 
     tree = rbtree_from_literal("(6B)");
-    REQUIRE(perform_delete_fixup(tree, nullptr, tree.root) == nullptr);
+    REQUIRE(perform_delete_fixup(tree, nullptr, &(tree.root)) == nullptr);
     REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(6B)");
 }
 
 TEST_CASE("perform_delete_fixup handles handles red node case", "[rbtree][delete]" ) {
     auto tree = rbtree_from_literal("(6B:(3R):(7B))");
-    REQUIRE(perform_delete_fixup(tree, tree.root, tree.root->left) == nullptr);
+    REQUIRE(perform_delete_fixup(tree, tree.root, &(tree.root->left)) == nullptr);
     REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(6B:(3B):(7B))");
 }
@@ -241,17 +241,17 @@ TEST_CASE("perform_delete_fixup handles handles red node case", "[rbtree][delete
 TEST_CASE("perform_delete_fixup handles handles left case 1", "[rbtree][delete]" ) {
     //note: this example is synthetic, does not represent a real possibility
     auto tree = rbtree_from_literal("(4B:(3B):(10R:(6B:(5B):(7B)):(13B:(11B):(15B))))");
-    REQUIRE(perform_delete_fixup(tree, tree.root, tree.root->left) == tree.root->left);
+    REQUIRE(perform_delete_fixup(tree, tree.root, &(tree.root->left)) == tree.root->left);
     REQUIRE(to_literal(tree) == "(10B:(4R:(3B):(6R:(5B):(7B))):(13B:(11B):(15B)))");
     //this is just to make the tree valid, 4 is a red node, will just terminate
-    REQUIRE(perform_delete_fixup(tree, tree.root, tree.root->left) == nullptr);
+    REQUIRE(perform_delete_fixup(tree, tree.root, &(tree.root->left)) == nullptr);
     REQUIRE(is_valid_tree(tree));
 }
 
 TEST_CASE("perform_delete_fixup handles handles left case 2", "[rbtree][delete]" ) {
     //null count as a black leaf, and we assume we removed (3B) from the tree, causing the duo black on the root->left "node"
     auto tree = rbtree_from_literal("(6B:null:(7B))");
-    REQUIRE(perform_delete_fixup(tree, tree.root, tree.root->left) == tree.root);
+    REQUIRE(perform_delete_fixup(tree, tree.root, &(tree.root->left)) == tree.root);
     REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(6B:null:(7R))");
 }
@@ -259,7 +259,7 @@ TEST_CASE("perform_delete_fixup handles handles left case 2", "[rbtree][delete]"
 TEST_CASE("perform_delete_fixup handles handles left case 3", "[rbtree][delete]" ) {
     //note: this example is synthetic, does not represent a real possibility
     auto tree = rbtree_from_literal("(6R:(3B):(10B:(8R:(7B):(9B)):(11B)))");
-    REQUIRE(perform_delete_fixup(tree, tree.root, tree.root->left) == nullptr);
+    REQUIRE(perform_delete_fixup(tree, tree.root, &(tree.root->left)) == nullptr);
     REQUIRE(find_violation(tree) == std::vector<std::string>{"root must not be red"});
     REQUIRE(to_literal(tree) == "(8R:(6B:(3B):(7B)):(10B:(9B):(11B)))");
 }
@@ -267,29 +267,25 @@ TEST_CASE("perform_delete_fixup handles handles left case 3", "[rbtree][delete]"
 TEST_CASE("perform_delete_fixup handles handles left case 4", "[rbtree][delete]" ) {
     //note: this example is synthetic, does not represent a real possibility
     auto tree = rbtree_from_literal("(5R:(3B):(7B:(6B):(11R:(8B):(12B))))");
-    REQUIRE(perform_delete_fixup(tree, tree.root, tree.root->left) == nullptr);
+    REQUIRE(perform_delete_fixup(tree, tree.root, &(tree.root->left)) == nullptr);
     REQUIRE(find_violation(tree) == std::vector<std::string>{"root must not be red"});
     REQUIRE(to_literal(tree) == "(7R:(5B:(3B):(6B)):(11B:(8B):(12B)))");
 }
 
-#define PRINT_LITERAL(str) REQUIRE(to_graphviz(rbtree_from_literal(str)) == "")
-
-#define PRINT_TREE(tree) REQUIRE(to_graphviz(tree) == "")
-
 TEST_CASE("perform_delete_fixup handles handles right case 1", "[rbtree][delete]" ) {
     //null count as a black leaf, and we assume we removed (7B) from the tree, causing the duo black on the root->left "node"
     auto tree = rbtree_from_literal("(10B:(5R:(3B:(2B):(4B)):(7B:(6B):(8B))):(12B))");
-    REQUIRE(perform_delete_fixup(tree, tree.root, tree.root->right) == tree.root->right);
+    REQUIRE(perform_delete_fixup(tree, tree.root, &(tree.root->right)) == tree.root->right);
     REQUIRE(to_literal(tree) == "(5B:(3B:(2B):(4B)):(10R:(7R:(6B):(8B)):(12B)))");
     //this is just to make the tree valid, 10 is a red node, will just terminate
-    REQUIRE(perform_delete_fixup(tree, tree.root, tree.root->right) == nullptr);
+    REQUIRE(perform_delete_fixup(tree, tree.root, &(tree.root->right)) == nullptr);
     REQUIRE(is_valid_tree(tree));
 }
 
 TEST_CASE("perform_delete_fixup handles handles right case 2", "[rbtree][delete]" ) {
     //null count as a black leaf, and we assume we removed (7B) from the tree, causing the duo black on the root->left "node"
     auto tree = rbtree_from_literal("(6B:(5B):null)");
-    REQUIRE(perform_delete_fixup(tree, tree.root, tree.root->right) == tree.root);
+    REQUIRE(perform_delete_fixup(tree, tree.root, &(tree.root->right)) == tree.root);
     REQUIRE(is_valid_tree(tree));
     REQUIRE(to_literal(tree) == "(6B:(5R):null)");
 }
@@ -297,7 +293,7 @@ TEST_CASE("perform_delete_fixup handles handles right case 2", "[rbtree][delete]
 TEST_CASE("perform_delete_fixup handles handles right case 3", "[rbtree][delete]" ) {
     //note: this example is synthetic, does not represent a real possibility
     auto tree = rbtree_from_literal("(15R:(10B:(7B):(13R:(11B):(14B))):(17B))");
-    REQUIRE(perform_delete_fixup(tree, tree.root, tree.root->right) == nullptr);
+    REQUIRE(perform_delete_fixup(tree, tree.root, &(tree.root->right)) == nullptr);
     REQUIRE(find_violation(tree) == std::vector<std::string>{"root must not be red"});
     REQUIRE(to_literal(tree) == "(13R:(10B:(7B):(11B)):(15B:(14B):(17B)))");
 }
@@ -305,7 +301,44 @@ TEST_CASE("perform_delete_fixup handles handles right case 3", "[rbtree][delete]
 TEST_CASE("perform_delete_fixup handles handles right case 4", "[rbtree][delete]" ) {
     //note: this example is synthetic, does not represent a real possibility
     auto tree = rbtree_from_literal("(10R:(5B:(3R:(2B):(4B)):(7B)):(12B))");
-    REQUIRE(perform_delete_fixup(tree, tree.root, tree.root->right) == nullptr);
+    REQUIRE(perform_delete_fixup(tree, tree.root, &(tree.root->right)) == nullptr);
     REQUIRE(find_violation(tree) == std::vector<std::string>{"root must not be red"});
     REQUIRE(to_literal(tree) == "(5R:(3B:(2B):(4B)):(10B:(7B):(12B)))");
+}
+
+TEST_CASE( "remove accepts non-existent value", "[rbtree][delete]" ) {
+    auto tree = rbtree_from_literal("(2B:(1B):(3B))");
+    remove(tree, 10);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(2B:(1B):(3B))");
+}
+
+TEST_CASE( "remove works on no child case", "[rbtree][delete]" ) {
+    auto tree = rbtree_from_literal("(2B:(1B):(3B))");
+    remove(tree, 1);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(2B:null:(3R))");
+
+    remove(tree, 3);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(2B)");
+}
+
+TEST_CASE( "remove works on 1 child case", "[rbtree][delete]" ) {
+    auto tree = rbtree_from_literal("(2B:(1R):null)");
+    remove(tree, 2);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(1B)");
+
+    tree = rbtree_from_literal("(2B:null:(3R))");
+    remove(tree, 2);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(3B)");
+}
+
+TEST_CASE( "remove works on 2 child case", "[rbtree][delete]" ) {
+    auto tree = rbtree_from_literal("(2B:(1B):(3B))");
+    remove(tree, 2);
+    REQUIRE(is_valid_tree(tree));
+    REQUIRE(to_literal(tree) == "(3B:(1R):null)");
 }

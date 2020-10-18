@@ -260,11 +260,14 @@ void insert(rbtree& tree, int value) {
 }
 
 
-rbtree::node* perform_delete_fixup(rbtree& tree, rbtree::node* parent, rbtree::node* to_fix) {
+rbtree::node* perform_delete_fixup(rbtree& tree, rbtree::node* parent, rbtree::node** to_fix_ref) {
     using color = rbtree::color;
+    auto to_fix = *to_fix_ref;
     if(tree.root == to_fix) {
-        //paint it black on red(1st element in tree) or ignore it on already black
-        to_fix->color = color::black;
+        if(to_fix!=nullptr) {
+            //paint it black on red(1st element in tree) or ignore it on already black
+            to_fix->color = color::black;
+        }
         return nullptr;
     }
     if(color_of(to_fix) == rbtree::color::red) {
@@ -273,16 +276,14 @@ rbtree::node* perform_delete_fixup(rbtree& tree, rbtree::node* parent, rbtree::n
         return nullptr;
     }
     //note: not root, so you have parent
-    if(to_fix == parent->left) {
+    if(to_fix_ref == &(parent->left)) {
         //left case
         //note: we can gurantee sibling is not null, otherwise path parent->sibling(+1) will have smaller black count than parent->to_fix(+2)->(whatsoever subtree)
         auto sibling = parent->right;
         if(color_of(sibling) == color::red) {
             //case 1
             rbtree_left_rotate(*ref_of(tree, parent));
-            to_fix->parent->parent->color = color::black;
-            to_fix->parent->color = color::red;
-            parent = to_fix->parent;
+            std::swap(parent->parent->color, parent->color);
             sibling = parent->right;
         }
         // case 1 is now case 2, 3 or 4
@@ -314,9 +315,7 @@ rbtree::node* perform_delete_fixup(rbtree& tree, rbtree::node* parent, rbtree::n
         if(color_of(sibling) == color::red) {
             //case 1
             rbtree_right_rotate(*ref_of(tree, parent));
-            to_fix->parent->parent->color = color::black;
-            to_fix->parent->color = color::red;
-            parent = to_fix->parent;
+            std::swap(parent->parent->color, parent->color);
             sibling = parent->left;
         }
         if(color_of(sibling->left) == color::black && color_of(sibling->right) == color::black) {
@@ -342,4 +341,94 @@ rbtree::node* perform_delete_fixup(rbtree& tree, rbtree::node* parent, rbtree::n
     }
 }
 
+#include<iostream>
+void perform_deletion(rbtree& tree, rbtree::node* parent, rbtree::node*& ref) {
+    rbtree::node* node = ref;
+    rbtree::node* displaced;
+    rbtree::color displaced_color;
+    rbtree::node* successor;
+    rbtree::node* successor_parent;
+    rbtree::node** successor_ref;
+    if(node->left == nullptr && node->right == nullptr) { // 0 child case
 
+        displaced = node;
+        displaced_color = node->color;
+        successor = nullptr;
+        successor_parent = parent;
+        successor_ref = &ref;
+
+        ref = nullptr;
+        delete node;
+
+    }  else if(node->left != nullptr && node->right == nullptr) { // 1 child case
+
+        displaced = node;
+        displaced_color = node->color;
+        successor = node->left;
+        successor_parent = parent;
+        successor_ref = &ref;
+
+        ref = node->left;
+        ref->parent = parent;
+        delete node;
+
+    } else if(node->left == nullptr && node->right != nullptr) { // 1 child case
+
+        displaced = node;
+        displaced_color = node->color;
+        successor = node->right;
+        successor_parent = parent;
+        successor_ref = &ref;
+
+        ref = node->right;
+        ref->parent = parent;
+        delete node;
+
+    } else { // 2 child case
+        //we replace the node to delete with the right subtree's smallest element
+        rbtree::node* victim = node->right;
+        rbtree::node* victim_parent = node; 
+        while(victim->left!=nullptr) {
+            victim = victim->left;
+            victim_parent = victim_parent->left;
+        }
+
+        int victim_value = victim->value;
+        node->value = victim_value;
+
+        auto succ = victim->right;
+        auto succ_ref = ref_of(tree, victim);
+        *succ_ref = succ;
+        if(succ != nullptr) {
+            succ->parent = victim->parent;
+        }
+
+        displaced = victim;
+        displaced_color = victim->color;
+        successor = succ;
+        successor_parent = victim_parent;
+        successor_ref = succ_ref;
+
+        delete victim;
+    }
+    if(displaced_color==rbtree::color::black) {
+        auto to_fix_parent = successor_parent;
+        auto to_fix_ref = successor_ref;
+        while(true) {
+            auto next = perform_delete_fixup(tree, to_fix_parent, to_fix_ref);
+            if(next!=nullptr) {
+                to_fix_ref = ref_of(tree, next);
+                to_fix_parent = (*to_fix_ref)->parent;
+            } else {
+                break;
+            }
+        }
+    }
+}
+
+void remove(rbtree& tree, int value) {
+    auto [parent, ref] = locate_parent_and_expected_ref(tree, value);
+    if(*ref != nullptr) {
+        perform_deletion(tree, parent, *ref);
+    }
+}
